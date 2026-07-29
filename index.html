@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 id="greeting">Home</h1>
+      <p id="clock" class="clock"></p>
+    </div>
+  </header>
+
+  <main class="grid">
+
+    <!-- Quick Links -->
+    <section class="panel" id="panel-links">
+      <div class="panel-header">
+        <h2>Quick Links</h2>
+        <button class="btn-icon" id="add-link-btn" title="Add link">+</button>
+      </div>
+      <div class="links-grid" id="links-grid"></div>
+    </section>
+
+    <!-- Reminders -->
+    <section class="panel" id="panel-reminders">
+      <div class="panel-header">
+        <h2>Reminders</h2>
+      </div>
+      <form id="reminder-form" class="inline-form">
+        <input type="text" id="reminder-text" placeholder="New reminder..." required>
+        <input type="datetime-local" id="reminder-due">
+        <button type="submit" class="btn">Add</button>
+      </form>
+      <ul class="reminder-list" id="reminder-list"></ul>
+    </section>
+
+    <!-- Calendar -->
+    <section class="panel" id="panel-calendar">
+      <div class="panel-header">
+        <h2>Calendar</h2>
+        <div class="calendar-nav">
+          <button class="btn-icon" id="cal-prev">&lsaquo;</button>
+          <span id="cal-month-label"></span>
+          <button class="btn-icon" id="cal-next">&rsaquo;</button>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="calendar-day-panel" id="calendar-day-panel" hidden>
+        <div class="panel-header">
+          <h3 id="calendar-day-title"></h3>
+          <button class="btn-icon" id="calendar-day-close">&times;</button>
+        </div>
+        <ul class="event-list" id="calendar-event-list"></ul>
+        <form id="calendar-event-form" class="inline-form">
+          <input type="text" id="calendar-event-text" placeholder="Add event..." required>
+          <button type="submit" class="btn">Add</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Roblox Lookup -->
+    <section class="panel panel-wide" id="panel-roblox">
+      <div class="panel-header">
+        <h2>Roblox Account Lookup</h2>
+      </div>
+      <form id="roblox-form" class="inline-form">
+        <input type="text" id="roblox-username" placeholder="Roblox username..." required>
+        <button type="submit" class="btn">Search</button>
+      </form>
+      <div id="roblox-status" class="roblox-status"></div>
+      <div id="roblox-result" class="roblox-result"></div>
+    </section>
+
+  </main>
+
+  <!-- Add/Edit link modal -->
+  <div class="modal" id="link-modal" hidden>
+    <div class="modal-content">
+      <h3 id="link-modal-title">Add Link</h3>
+      <form id="link-form">
+        <label>Label<input type="text" id="link-label" required></label>
+        <label>URL<input type="url" id="link-url" placeholder="https://..." required></label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="link-cancel">Cancel</button>
+          <button type="button" class="btn btn-danger" id="link-delete" hidden>Delete</button>
+          <button type="submit" class="btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/reminders.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/links.js"></script>
+  <script src="js/roblox.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

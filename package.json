@@ -1,0 +1,12 @@
+{
+  "name": "homepage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal homepage: reminders, calendar, quick links, and a Roblox account lookup.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
