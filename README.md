@@ -2,16 +2,28 @@
 
 A personal homepage dashboard with:
 
-- **Reminders** — add tasks with optional due date/time, check off or delete, overdue items highlighted.
-- **Calendar** — month view, click any day to add/remove events.
+- **Reminders** — add tasks with an optional due date/time, check off or delete, overdue items highlighted. Reminders with a due date also show up on the Calendar automatically (as a read-only entry — manage them from Reminders).
+- **Calendar** — full-width month view. Click any day to add an event with a date range; multi-day events render as a continuous bar spanning the days they cover, with overlapping events stacking into separate rows.
 - **Quick Links** — editable, drag-to-reorder link tiles with auto-fetched favicons.
-- **Roblox account lookup** — enter a username, see everything publicly visible on that account: display name, bio, account creation date, avatar, friend/follower/following counts, groups, badge count, and public experiences. Only uses Roblox's public, unauthenticated APIs — the same data anyone can see by visiting the profile page.
+- **Roblox account lookup** — enter a username, see everything publicly visible on that account: display name, bio, account creation date, avatar, friend/follower/following counts, groups (two-column, with role), badge count, public experiences, and favourited experiences (when that's public on the account). Only uses Roblox's public, unauthenticated APIs — the same data anyone can see by visiting the profile page.
+- **Editable name** — click your name in the greeting to rename it.
+- Animated Grainient background and "liquid glass" cards.
 
-All dashboard data (reminders, calendar events, links) is stored in the browser's `localStorage` — nothing is sent to a server except the Roblox lookup itself.
+## Data storage
+
+Everything lives in the browser's `localStorage` first, so the app always works instantly and offline. It's optionally also mirrored to a small Vercel KV store via `/api/data`, so the same dashboard shows up on every device instead of being stuck in one browser. If no KV store is attached, that sync step just fails silently and the app behaves exactly like a localStorage-only app — nothing breaks.
+
+### Enabling cross-device save (optional)
+
+1. In the Vercel dashboard, open this project → **Storage** tab → **Create Database** → **KV** (Upstash).
+2. Follow the prompts, then **Connect** the store to this project. Vercel automatically adds the `KV_REST_API_URL` and `KV_REST_API_TOKEN` environment variables — no code changes needed.
+3. Redeploy (or it'll pick it up on the next deploy automatically). `/api/data` will start working, and the dashboard will sync across any browser/device you open it from.
 
 ## Stack
 
-Static HTML/CSS/vanilla JS frontend, plus one serverless function (`api/roblox.js`) that proxies Roblox's API server-side to avoid browser CORS restrictions.
+Static HTML/CSS/vanilla JS frontend, plus two serverless functions:
+- `api/roblox.js` — proxies Roblox's API server-side to avoid browser CORS restrictions.
+- `api/data.js` — reads/writes the synced dashboard state to Vercel KV (see above).
 
 ## Local development
 
@@ -20,8 +32,8 @@ npm install -g vercel   # if you don't have it
 vercel dev
 ```
 
-Then open the printed local URL. The Roblox lookup requires `vercel dev` (or a real Vercel deployment) since it needs the `/api` function — opening `index.html` directly won't run the lookup.
+Then open the printed local URL. The Roblox lookup requires `vercel dev` (or a real Vercel deployment) since it needs the `/api` functions — opening `index.html` directly won't run it.
 
 ## Deploy
 
-Import this repo into [Vercel](https://vercel.com/new). No environment variables or build step are required — Vercel will detect `index.html` as the static site and `api/roblox.js` as a serverless function automatically.
+Import this repo into [Vercel](https://vercel.com/new). No environment variables or build step are required to get the site live — Vercel will detect `index.html` as the static site and the `api/*.js` files as serverless functions automatically. Cross-device save is optional (see above).

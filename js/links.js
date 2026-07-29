@@ -22,6 +22,7 @@ const Links = (() => {
 
   function save(items) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    Sync.push();
   }
 
   function faviconFor(url) {

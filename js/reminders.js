@@ -1,6 +1,7 @@
 // Reminders widget — stored in localStorage.
 // `due` is either null, a plain 'YYYY-MM-DD' date, or a full 'YYYY-MM-DDTHH:MM'
-// datetime — time is always optional.
+// datetime — time is always optional. Reminders with a due date also show up
+// on the Calendar (see loadAsCalendarEvents, consumed by js/calendar.js).
 const Reminders = (() => {
   const STORAGE_KEY = 'homepage_reminders';
 
@@ -14,6 +15,11 @@ const Reminders = (() => {
 
   function save(items) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    Sync.push();
+  }
+
+  function refreshCalendar() {
+    if (typeof Calendar !== 'undefined' && Calendar.refresh) Calendar.refresh();
   }
 
   function dueToDate(due) {
@@ -28,6 +34,24 @@ const Reminders = (() => {
     return hasTime
       ? d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
       : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+
+  // Exposed for the Calendar widget — reminders with a due date appear
+  // there as read-only entries (deleting/completing them happens here).
+  function loadAsCalendarEvents() {
+    return load()
+      .filter(r => r.due)
+      .map(r => {
+        const dateKey = r.due.slice(0, 10);
+        return {
+          id: `reminder-${r.id}`,
+          text: `⏰ ${r.text}`,
+          start: dateKey,
+          end: dateKey,
+          readOnly: true,
+          done: !!r.done
+        };
+      });
   }
 
   function render() {
@@ -58,6 +82,7 @@ const Reminders = (() => {
         if (target) target.done = checkbox.checked;
         save(all);
         render();
+        refreshCalendar();
       });
 
       const text = document.createElement('span');
@@ -80,6 +105,7 @@ const Reminders = (() => {
       del.addEventListener('click', () => {
         save(load().filter(x => x.id !== item.id));
         render();
+        refreshCalendar();
       });
       li.appendChild(del);
 
@@ -94,6 +120,7 @@ const Reminders = (() => {
       const textInput = document.getElementById('reminder-text');
       const dateInput = document.getElementById('reminder-due-date');
       const timeInput = document.getElementById('reminder-due-time');
+      if (!textInput.value.trim()) return;
 
       let due = null;
       if (dateInput.value) {
@@ -111,10 +138,12 @@ const Reminders = (() => {
       textInput.value = '';
       dateInput.value = '';
       timeInput.value = '';
+      textInput.focus();
       render();
+      refreshCalendar();
     });
     render();
   }
 
-  return { init };
+  return { init, loadAsCalendarEvents };
 })();

@@ -16,6 +16,16 @@ const Calendar = (() => {
 
   function save(events) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    Sync.push();
+  }
+
+  // Real calendar events plus reminders that have a due date (shown
+  // read-only — they're managed from the Reminders widget).
+  function allEvents() {
+    const reminderEvents = (typeof Reminders !== 'undefined' && Reminders.loadAsCalendarEvents)
+      ? Reminders.loadAsCalendarEvents()
+      : [];
+    return load().concat(reminderEvents);
   }
 
   function keyFor(d) {
@@ -86,7 +96,7 @@ const Calendar = (() => {
     grid.appendChild(dow);
 
     const weeks = buildWeeks(year, month);
-    const events = load();
+    const events = allEvents();
     const today = todayKey();
 
     weeks.forEach(week => {
@@ -135,6 +145,8 @@ const Calendar = (() => {
           bar.className = 'cal-bar';
           if (seg.contLeft) bar.classList.add('cont-left');
           if (seg.contRight) bar.classList.add('cont-right');
+          if (seg.event.readOnly) bar.classList.add('cal-bar-reminder');
+          if (seg.event.done) bar.classList.add('cal-bar-done');
           bar.style.gridColumn = `${seg.colStart + 1} / ${seg.colEnd + 2}`;
           bar.style.gridRow = `${seg.lane + 1}`;
           bar.textContent = seg.event.text;
@@ -167,7 +179,7 @@ const Calendar = (() => {
     const list = document.getElementById('calendar-event-list');
     list.innerHTML = '';
     if (!selectedKey) return;
-    const events = load();
+    const events = allEvents();
     const dayEvents = eventsOverlappingDay(events, selectedKey);
 
     if (dayEvents.length === 0) {
@@ -185,15 +197,24 @@ const Calendar = (() => {
       span.textContent = ev.start === ev.end
         ? ev.text
         : `${ev.text} (${formatShort(ev.start)} – ${formatShort(ev.end)})`;
-      const del = document.createElement('button');
-      del.textContent = '✕';
-      del.addEventListener('click', () => {
-        save(load().filter(x => x.id !== ev.id));
-        renderEvents();
-        renderGrid();
-      });
       li.appendChild(span);
-      li.appendChild(del);
+
+      if (ev.readOnly) {
+        const tag = document.createElement('span');
+        tag.textContent = 'reminder';
+        tag.style.fontSize = '11px';
+        tag.style.color = 'var(--text-dim)';
+        li.appendChild(tag);
+      } else {
+        const del = document.createElement('button');
+        del.textContent = '✕';
+        del.addEventListener('click', () => {
+          save(load().filter(x => x.id !== ev.id));
+          renderEvents();
+          renderGrid();
+        });
+        li.appendChild(del);
+      }
       list.appendChild(li);
     });
   }
@@ -233,6 +254,7 @@ const Calendar = (() => {
       save(events);
 
       textInput.value = '';
+      textInput.focus();
       renderEvents();
       renderGrid();
     });
@@ -240,5 +262,5 @@ const Calendar = (() => {
     renderGrid();
   }
 
-  return { init };
+  return { init, refresh: renderGrid };
 })();
