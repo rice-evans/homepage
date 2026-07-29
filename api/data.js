@@ -1,26 +1,33 @@
 // GET/POST /api/data — reads/writes the whole dashboard state (links,
-// reminders, calendar events, display name) as one JSON blob in Vercel KV,
-// so it's the same on every device instead of trapped in one browser.
+// reminders, calendar events, display name) as one JSON blob in an Upstash
+// Redis store, so it's the same on every device instead of trapped in one
+// browser.
 //
-// Requires a KV store attached to the Vercel project (Storage tab -> Create
-// Database -> KV -> Connect to Project). That injects KV_REST_API_URL and
-// KV_REST_API_TOKEN automatically — no other setup needed. Until that's
-// done, this returns 501 and the frontend just falls back to localStorage
-// only, exactly like before.
+// Requires an Upstash database attached to the Vercel project (Storage tab
+// -> Marketplace Database Providers -> Upstash -> Connect to Project — NOT
+// the plain "Redis" tile, which uses a different, non-REST connection).
+// That injects either KV_REST_API_URL/KV_REST_API_TOKEN or
+// UPSTASH_REDIS_REST_URL/UPSTASH_REDIS_REST_TOKEN depending on how the
+// integration names things — this checks both so either works. Until one is
+// connected, this returns 501 and the frontend just falls back to
+// localStorage only, exactly like before.
 const STORE_KEY = 'homepage:state';
 
-function kvConfigured() {
-  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+function kvCreds() {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  return url && token ? { url, token } : null;
 }
 
-// Upstash's REST API (which powers Vercel KV) accepts commands as a JSON
-// array posted to the store's base URL — e.g. ["GET", "key"] or
-// ["SET", "key", "value"]. See https://upstash.com/docs/redis/features/restapi
+// Upstash's REST API accepts commands as a JSON array posted to the store's
+// base URL — e.g. ["GET", "key"] or ["SET", "key", "value"].
+// See https://upstash.com/docs/redis/features/restapi
 async function kvCommand(command) {
-  const res = await fetch(process.env.KV_REST_API_URL, {
+  const creds = kvCreds();
+  const res = await fetch(creds.url, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+      Authorization: `Bearer ${creds.token}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(command)
@@ -30,8 +37,8 @@ async function kvCommand(command) {
 }
 
 module.exports = async function handler(req, res) {
-  if (!kvConfigured()) {
-    res.status(501).json({ error: 'No Vercel KV store connected to this project yet.' });
+  if (!kvCreds()) {
+    res.status(501).json({ error: 'No Upstash store connected to this project yet.' });
     return;
   }
 

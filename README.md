@@ -11,19 +11,19 @@ A personal homepage dashboard with:
 
 ## Data storage
 
-Everything lives in the browser's `localStorage` first, so the app always works instantly and offline. It's optionally also mirrored to a small Vercel KV store via `/api/data`, so the same dashboard shows up on every device instead of being stuck in one browser. If no KV store is attached, that sync step just fails silently and the app behaves exactly like a localStorage-only app — nothing breaks.
+Everything lives in the browser's `localStorage` first, so the app always works instantly and offline. It's optionally also mirrored to an Upstash Redis store via `/api/data`, so the same dashboard shows up on every device instead of being stuck in one browser. If no store is attached, that sync step just fails silently (a 501) and the app behaves exactly like a localStorage-only app — nothing breaks.
 
 ### Enabling cross-device save (optional)
 
-1. In the Vercel dashboard, open this project → **Storage** tab → **Create Database** → **KV** (Upstash).
-2. Follow the prompts, then **Connect** the store to this project. Vercel automatically adds the `KV_REST_API_URL` and `KV_REST_API_TOKEN` environment variables — no code changes needed.
-3. Redeploy (or it'll pick it up on the next deploy automatically). `/api/data` will start working, and the dashboard will sync across any browser/device you open it from.
+1. In the Vercel dashboard, open this project → **Storage** tab → **Marketplace Database Providers** → **Upstash** → **Upstash for Redis**.
+2. Create a database, then **Connect a Project** to this project. Use custom prefix `KV` so the injected variables are named `KV_REST_API_URL` / `KV_REST_API_TOKEN` (the code also accepts the unprefixed `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` names as a fallback, in case Vercel's naming changes again).
+3. Redeploy (or it'll pick it up on the next deploy automatically). `/api/data` will start working, and the dashboard will sync across any browser/device you open it from — check by visiting `/api/data` directly; `{"error":"..."}` means it's not connected yet, `null` or JSON data means it's live.
 
 ## Stack
 
 Static HTML/CSS/vanilla JS frontend, plus two serverless functions:
 - `api/roblox.js` — proxies Roblox's API server-side to avoid browser CORS restrictions.
-- `api/data.js` — reads/writes the synced dashboard state to Vercel KV (see above).
+- `api/data.js` — reads/writes the synced dashboard state to Upstash Redis via its REST API (see above).
 
 ## Local development
 
