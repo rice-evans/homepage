@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <div id="grainient-bg"></div>
   <header class="topbar">
     <div class="topbar-left">
       <h1 id="greeting">Home</h1>
@@ -32,14 +33,15 @@
       </div>
       <form id="reminder-form" class="inline-form">
         <input type="text" id="reminder-text" placeholder="New reminder..." required>
-        <input type="datetime-local" id="reminder-due">
+        <input type="date" id="reminder-due-date" title="Due date (optional)">
+        <input type="time" id="reminder-due-time" title="Due time (optional)">
         <button type="submit" class="btn">Add</button>
       </form>
       <ul class="reminder-list" id="reminder-list"></ul>
     </section>
 
     <!-- Calendar -->
-    <section class="panel" id="panel-calendar">
+    <section class="panel panel-wide" id="panel-calendar">
       <div class="panel-header">
         <h2>Calendar</h2>
         <div class="calendar-nav">
@@ -57,6 +59,8 @@
         <ul class="event-list" id="calendar-event-list"></ul>
         <form id="calendar-event-form" class="inline-form">
           <input type="text" id="calendar-event-text" placeholder="Add event..." required>
+          <label class="mini-label">From<input type="date" id="calendar-event-start" required></label>
+          <label class="mini-label">To<input type="date" id="calendar-event-end"></label>
           <button type="submit" class="btn">Add</button>
         </form>
       </div>
@@ -93,6 +97,8 @@
     </div>
   </div>
 
+  <script src="js/grainient.js"></script>
+  <script src="js/glass-surface.js"></script>
   <script src="js/reminders.js"></script>
   <script src="js/calendar.js"></script>
   <script src="js/links.js"></script>

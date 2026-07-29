@@ -14,12 +14,20 @@ const Roblox = (() => {
     el.classList.add('visible');
 
     const groupsHtml = (data.groups || []).length
-      ? `<div class="rbx-tags">${data.groups.map(g => `<span class="rbx-tag">${escapeHtml(g.name)} — ${escapeHtml(g.role)}</span>`).join('')}</div>`
+      ? `<div class="rbx-group-list">${data.groups.map(g => `
+          <div class="rbx-group-row">
+            <span class="rbx-group-name">${escapeHtml(g.name)}</span>
+            <span class="rbx-group-role">${escapeHtml(g.role)}</span>
+          </div>`).join('')}</div>`
       : '<p style="color:var(--text-dim);font-size:13px;">No public groups.</p>';
 
     const gamesHtml = (data.games || []).length
       ? `<div class="rbx-tags">${data.games.map(g => `<span class="rbx-tag">${escapeHtml(g.name)} (${fmtNum(g.visits)} visits)</span>`).join('')}</div>`
       : '<p style="color:var(--text-dim);font-size:13px;">No public experiences.</p>';
+
+    const favoriteGamesHtml = (data.favoriteGames || []).length
+      ? `<div class="rbx-tags">${data.favoriteGames.map(g => `<span class="rbx-tag">${escapeHtml(g.name)}</span>`).join('')}</div>`
+      : '<p style="color:var(--text-dim);font-size:13px;">No public favourites (or favourites are private).</p>';
 
     el.innerHTML = `
       <div class="rbx-header">
@@ -51,6 +59,10 @@ const Roblox = (() => {
       <div class="rbx-section">
         <h4>Public experiences</h4>
         ${gamesHtml}
+      </div>
+      <div class="rbx-section">
+        <h4>Favourited experiences</h4>
+        ${favoriteGamesHtml}
       </div>
     `;
   }

@@ -1,25 +1,41 @@
 :root {
+  color-scheme: dark;
   --bg: #0f1216;
   --panel: #171b21;
-  --panel-alt: #1e232b;
-  --border: #2a303a;
+  --panel-alt: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
   --text: #e7ebf0;
-  --text-dim: #9aa4b2;
-  --accent: #5b8cff;
+  --text-dim: #aab2c0;
+  --accent: #7fa8ff;
   --accent-dim: #34405c;
   --danger: #ff5c5c;
   --good: #3ecf8e;
-  --radius: 12px;
+  --radius: 16px;
 }
 
 * { box-sizing: border-box; }
 
-body {
+html, body {
   margin: 0;
+  min-height: 100%;
+}
+
+body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
+  position: relative;
 }
+
+/* Animated Grainient background (js/grainient.js). The gradient below is a
+   static fallback shown until WebGL kicks in, or if it's unavailable. */
+#grainient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, #000000 0%, #3d4249 55%, #94a3b8 100%);
+}
+#grainient-bg canvas { position: absolute; inset: 0; }
 
 .topbar {
   display: flex;
@@ -41,11 +57,30 @@ body {
 
 .panel-wide { grid-column: 1 / -1; }
 
+/* Liquid glass cards. Base look is a frosted dark panel; js/glass-surface.js
+   adds either the true SVG-filter distortion (Chromium) or a plain blur
+   fallback (Safari/Firefox / no support) on top of this. */
 .panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
+  position: relative;
+  background: rgba(20, 24, 30, 0.42);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: var(--radius);
   padding: 18px 20px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.panel.glass-surface-svg {
+  background: rgba(20, 24, 30, var(--glass-frost, 0.32));
+  backdrop-filter: var(--glass-filter-url) blur(4px) saturate(var(--glass-saturation, 1.5));
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+}
+.panel.glass-surface-fallback {
+  background: rgba(20, 24, 30, 0.5);
+  backdrop-filter: blur(20px) saturate(1.6) brightness(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6) brightness(1.05);
 }
 
 .panel-header {
@@ -60,15 +95,16 @@ body {
 
 .btn {
   background: var(--accent);
-  color: white;
+  color: #0f1216;
   border: none;
   border-radius: 8px;
   padding: 8px 14px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
 }
 .btn:hover { filter: brightness(1.1); }
-.btn-secondary { background: var(--panel-alt); color: var(--text); }
+.btn-secondary { background: var(--panel-alt); color: var(--text); font-weight: 400; }
 .btn-danger { background: var(--danger); color: white; }
 
 .btn-icon {
@@ -86,21 +122,44 @@ body {
 
 .inline-form {
   display: flex;
+  align-items: flex-end;
   gap: 8px;
   margin-bottom: 12px;
   flex-wrap: wrap;
 }
 .inline-form input[type="text"],
-.inline-form input[type="datetime-local"],
-.inline-form input[type="url"] {
+.inline-form input[type="url"],
+.inline-form input[type="date"],
+.inline-form input[type="time"] {
   flex: 1;
-  min-width: 120px;
+  min-width: 110px;
   background: var(--panel-alt);
   border: 1px solid var(--border);
   color: var(--text);
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 14px;
+}
+.mini-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.mini-label input { margin-top: 0; }
+
+/* Hide the native calendar-picker icon on date/time fields for a cleaner,
+   custom look — clicking anywhere in the field still opens the picker. */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
 }
 
 /* Links */
@@ -172,16 +231,26 @@ body {
 
 /* Calendar */
 .calendar-nav { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.calendar-grid {
+
+.calendar-grid { display: flex; flex-direction: column; gap: 2px; }
+
+.cal-dow-row, .cal-week-daynums {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
 }
-.cal-dow { text-align: center; font-size: 11px; color: var(--text-dim); padding-bottom: 4px; }
-.cal-cell {
-  aspect-ratio: 1;
+.cal-dow { text-align: center; font-size: 11px; color: var(--text-dim); padding-bottom: 6px; }
+
+.cal-week {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 4px;
+  margin-top: 2px;
+}
+.cal-week:first-of-type { border-top: none; margin-top: 0; }
+
+.cal-daynum {
+  height: 34px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
@@ -189,17 +258,33 @@ body {
   cursor: pointer;
   background: var(--panel-alt);
   border: 1px solid transparent;
-  position: relative;
 }
-.cal-cell:hover { border-color: var(--accent); }
-.cal-cell.empty { background: transparent; cursor: default; }
-.cal-cell.today { border-color: var(--accent); font-weight: 600; }
-.cal-cell .dot {
-  width: 4px; height: 4px; border-radius: 50%;
-  background: var(--good);
-  position: absolute;
-  bottom: 6px;
+.cal-daynum:hover { border-color: var(--accent); }
+.cal-daynum.out-of-month { color: var(--text-dim); opacity: 0.4; }
+.cal-daynum.today { border-color: var(--accent); font-weight: 700; color: var(--accent); }
+
+.cal-week-bars {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px 4px;
+  margin-top: 3px;
 }
+.cal-bar {
+  grid-row: 1;
+  background: var(--accent);
+  color: #0f1216;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.cal-bar.cont-left { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: -4px; padding-left: 10px; }
+.cal-bar.cont-right { border-top-right-radius: 0; border-bottom-right-radius: 0; margin-right: -4px; }
+
 .calendar-day-panel {
   margin-top: 14px;
   border-top: 1px solid var(--border);
@@ -239,6 +324,26 @@ body {
 .rbx-tag { background: var(--panel-alt); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 12px; }
 .rbx-error { color: var(--danger); font-size: 14px; }
 
+/* Groups: name on the left, role on the right of each row */
+.rbx-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rbx-group-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.rbx-group-name { font-weight: 600; }
+.rbx-group-role { color: var(--text-dim); text-align: right; white-space: nowrap; }
+
 /* Modal */
 .modal {
   position: fixed; inset: 0;
@@ -248,8 +353,10 @@ body {
 }
 .modal[hidden] { display: none; }
 .modal-content {
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: rgba(20, 24, 30, 0.75);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius);
   padding: 20px;
   width: 320px;

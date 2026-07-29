@@ -45,7 +45,8 @@ module.exports = async function handler(req, res) {
       followingCount,
       groups,
       badges,
-      games
+      games,
+      favoriteGames
     ] = await Promise.all([
       safeFetchJson(`https://users.roblox.com/v1/users/${userId}`),
       safeFetchJson(`https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=420x420&format=Png&isCircular=false`),
@@ -55,7 +56,11 @@ module.exports = async function handler(req, res) {
       safeFetchJson(`https://friends.roblox.com/v1/users/${userId}/followings/count`),
       safeFetchJson(`https://groups.roblox.com/v1/users/${userId}/groups/roles`),
       safeFetchJson(`https://badges.roblox.com/v1/users/${userId}/badges?limit=100&sortOrder=Desc`),
-      safeFetchJson(`https://games.roblox.com/v2/users/${userId}/games?accessFilter=Public&limit=50`)
+      safeFetchJson(`https://games.roblox.com/v2/users/${userId}/games?accessFilter=Public&limit=50`),
+      // Favorites are only visible when the account's "favorites" privacy is
+      // public — Roblox will 401/403 this otherwise, which safeFetchJson
+      // just turns into null, and we show nothing rather than an error.
+      safeFetchJson(`https://games.roblox.com/v2/users/${userId}/favorite/games?limit=50`)
     ]);
 
     res.status(200).json({
@@ -86,6 +91,11 @@ module.exports = async function handler(req, res) {
         name: g.name,
         placeId: g.rootPlaceId,
         playing: g.playing,
+        visits: g.visits
+      })),
+      favoriteGames: (favoriteGames?.data || []).map(g => ({
+        name: g.name,
+        placeId: g.rootPlaceId ?? g.placeId,
         visits: g.visits
       }))
     });

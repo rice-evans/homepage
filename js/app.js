@@ -20,4 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
   Reminders.init();
   Calendar.init();
   Roblox.init();
+
+  Grainient.init(document.getElementById('grainient-bg'), {
+    color1: '#000000',
+    color2: '#3d4249',
+    color3: '#94a3b8'
+  });
+  GlassSurface.applyToAll('.panel');
 });
