@@ -186,7 +186,7 @@ const Calendar = (() => {
       const li = document.createElement('li');
       li.style.color = 'var(--text-dim)';
       li.style.fontSize = '13px';
-      li.textContent = 'No events.';
+      li.textContent = 'No Events.';
       list.appendChild(li);
       return;
     }
@@ -201,7 +201,7 @@ const Calendar = (() => {
 
       if (ev.readOnly) {
         const tag = document.createElement('span');
-        tag.textContent = 'reminder';
+        tag.textContent = 'Reminder';
         tag.style.fontSize = '11px';
         tag.style.color = 'var(--text-dim)';
         li.appendChild(tag);

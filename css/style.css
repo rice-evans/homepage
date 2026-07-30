@@ -15,6 +15,12 @@
 
 * { box-sizing: border-box; }
 
+/* Global safeguard: the `hidden` attribute must always win over any
+   component's own `display` rule (e.g. .btn sets display:inline-flex,
+   which would otherwise silently defeat [hidden] on buttons like the
+   link-delete button or the day panel). */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   min-height: 100%;
@@ -25,6 +31,13 @@ body {
   background: var(--bg);
   color: var(--text);
   position: relative;
+}
+
+/* Form controls don't inherit the page font by default in any browser —
+   without this they render in the OS's UI font instead, which is the most
+   common cause of "inconsistent fonts" on a page like this. */
+button, input, select, textarea {
+  font-family: inherit;
 }
 
 /* Animated Grainient background (js/grainient.js). The gradient below is a
@@ -238,7 +251,9 @@ input[type="datetime-local"] {
 .link-tile.dragging { opacity: 0.4; }
 
 /* Reminders */
-.reminder-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+.reminder-list { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+.reminder-sublist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.reminder-divider { height: 1px; background: var(--border); margin: 4px 2px; flex-shrink: 0; }
 .reminder-item {
   display: flex;
   align-items: center;
@@ -414,4 +429,22 @@ input[type="datetime-local"] {
 
 @media (max-width: 800px) {
   .grid { grid-template-columns: 1fr; }
+}
+
+/* Confetti burst — fired from js/reminders.js when a reminder is completed */
+.confetti-piece {
+  position: fixed;
+  width: 7px;
+  height: 10px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 999;
+  animation: confetti-burst 900ms ease-out forwards;
+}
+@keyframes confetti-burst {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx), calc(var(--dy) + 160px)) rotate(var(--rot)); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece { display: none; }
 }

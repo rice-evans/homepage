@@ -19,23 +19,23 @@ const Roblox = (() => {
             <span class="rbx-group-name">${escapeHtml(g.name)}</span>
             <span class="rbx-group-role">${escapeHtml(g.role)}</span>
           </div>`).join('')}</div>`
-      : '<p style="color:var(--text-dim);font-size:13px;">No public groups.</p>';
+      : '<p style="color:var(--text-dim);font-size:13px;">No Public Groups.</p>';
 
     const gamesHtml = (data.games || []).length
       ? `<div class="rbx-tags">${data.games.map(g => `<span class="rbx-tag">${escapeHtml(g.name)} (${fmtNum(g.visits)} visits)</span>`).join('')}</div>`
-      : '<p style="color:var(--text-dim);font-size:13px;">No public experiences.</p>';
+      : '<p style="color:var(--text-dim);font-size:13px;">No Public Experiences.</p>';
 
     const favoriteGamesHtml = (data.favoriteGames || []).length
       ? `<div class="rbx-tags">${data.favoriteGames.map(g => `<span class="rbx-tag">${escapeHtml(g.name)}</span>`).join('')}</div>`
-      : '<p style="color:var(--text-dim);font-size:13px;">No public favourites (or favourites are private).</p>';
+      : '<p style="color:var(--text-dim);font-size:13px;">No Public Favourites (Or Favourites Are Private).</p>';
 
     el.innerHTML = `
       <div class="rbx-header">
         <img src="${data.avatarHeadshot || data.avatarImage || ''}" alt="avatar">
         <div>
-          <div class="rbx-name">${escapeHtml(data.displayName || data.username)}${data.isBanned ? ' ⚠️ (terminated)' : ''}</div>
+          <div class="rbx-name">${escapeHtml(data.displayName || data.username)}${data.isBanned ? ' ⚠️ (Terminated)' : ''}</div>
           <div class="rbx-username">@${escapeHtml(data.username)} · ID ${data.userId}</div>
-          <a href="https://www.roblox.com/users/${data.userId}/profile" target="_blank" rel="noopener noreferrer">View profile on Roblox →</a>
+          <a href="https://www.roblox.com/users/${data.userId}/profile" target="_blank" rel="noopener noreferrer">View Profile On Roblox →</a>
         </div>
       </div>
       <div class="rbx-stats">
@@ -45,23 +45,23 @@ const Roblox = (() => {
         <div class="rbx-stat"><div class="val">${fmtNum(data.badgeCount)}</div><div class="label">Badges</div></div>
       </div>
       <div class="rbx-section">
-        <h4>Account created</h4>
+        <h4>Account Created</h4>
         <p>${fmtDate(data.created)}</p>
       </div>
       <div class="rbx-section">
         <h4>Bio</h4>
-        <div class="rbx-desc">${escapeHtml(data.description) || '<span style="color:var(--text-dim)">No bio set.</span>'}</div>
+        <div class="rbx-desc">${escapeHtml(data.description) || '<span style="color:var(--text-dim)">No Bio Set.</span>'}</div>
       </div>
       <div class="rbx-section">
         <h4>Groups</h4>
         ${groupsHtml}
       </div>
       <div class="rbx-section">
-        <h4>Public experiences</h4>
+        <h4>Public Experiences</h4>
         ${gamesHtml}
       </div>
       <div class="rbx-section">
-        <h4>Favourited experiences</h4>
+        <h4>Favourited Experiences</h4>
         ${favoriteGamesHtml}
       </div>
     `;
@@ -86,21 +86,21 @@ const Roblox = (() => {
 
       result.classList.remove('visible');
       result.innerHTML = '';
-      status.textContent = 'Looking up...';
+      status.textContent = 'Looking Up...';
 
       try {
         const res = await fetch(`/api/roblox?username=${encodeURIComponent(username)}`);
         const data = await res.json();
 
         if (!res.ok) {
-          status.innerHTML = `<span class="rbx-error">${escapeHtml(data.error || 'Lookup failed.')}</span>`;
+          status.innerHTML = `<span class="rbx-error">${escapeHtml(data.error || 'Lookup Failed.')}</span>`;
           return;
         }
 
         status.textContent = '';
         render(data);
       } catch (err) {
-        status.innerHTML = `<span class="rbx-error">Network error — is this running on Vercel (or "vercel dev")? The lookup needs the /api function.</span>`;
+        status.innerHTML = `<span class="rbx-error">Network Error — Is This Running On Vercel (Or "Vercel Dev")? The Lookup Needs The /api Function.</span>`;
       }
     });
   }

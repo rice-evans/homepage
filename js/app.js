@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function updateGreetingPrefix() {
     const hour = new Date().getHours();
-    prefix.textContent = (hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening') + ',';
+    prefix.textContent = (hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening') + ',';
   }
 
   function updateClock() {

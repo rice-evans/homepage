@@ -38,7 +38,7 @@ async function kvCommand(command) {
 
 module.exports = async function handler(req, res) {
   if (!kvCreds()) {
-    res.status(501).json({ error: 'No Upstash store connected to this project yet.' });
+    res.status(501).json({ error: 'No Upstash Store Connected To This Project Yet.' });
     return;
   }
 
@@ -58,8 +58,8 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ error: 'Method Not Allowed' });
   } catch (err) {
-    res.status(500).json({ error: 'KV request failed.', detail: err.message });
+    res.status(500).json({ error: 'KV Request Failed.', detail: err.message });
   }
 };

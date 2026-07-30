@@ -18,7 +18,7 @@ async function safeFetchJson(url, opts) {
 module.exports = async function handler(req, res) {
   const username = (req.query.username || '').trim();
   if (!username) {
-    res.status(400).json({ error: 'Missing "username" query parameter.' });
+    res.status(400).json({ error: 'Missing "Username" Query Parameter.' });
     return;
   }
 
@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
 
     const match = resolve && resolve.data && resolve.data[0];
     if (!match) {
-      res.status(404).json({ error: `No Roblox account found for username "${username}".` });
+      res.status(404).json({ error: `No Roblox Account Found For Username "${username}".` });
       return;
     }
     const userId = match.id;
@@ -100,6 +100,6 @@ module.exports = async function handler(req, res) {
       }))
     });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch Roblox data.', detail: err.message });
+    res.status(500).json({ error: 'Failed To Fetch Roblox Data.', detail: err.message });
   }
 };
