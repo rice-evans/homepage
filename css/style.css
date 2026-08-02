@@ -96,6 +96,7 @@ button, input, select, textarea {
 }
 .nav-item:hover { background: var(--panel-alt); color: var(--text); }
 .nav-item.active { background: var(--accent-dim); color: var(--text); }
+.nav-item-danger:hover { background: rgba(255, 92, 92, 0.14); color: var(--danger); }
 .nav-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: inherit; }
 .nav-icon svg { width: 20px; height: 20px; }
 .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
@@ -284,6 +285,7 @@ input[type="time"],
 input[type="datetime-local"] {
   color-scheme: dark;
   text-transform: uppercase;
+  text-align: center;
 }
 
 /* Links */
@@ -345,7 +347,7 @@ input[type="datetime-local"] {
 .reminder-item.done .reminder-text { text-decoration: line-through; color: var(--text-dim); }
 .reminder-item.overdue { border-color: var(--danger); }
 .reminder-text { flex: 1; font-size: 14px; }
-.reminder-due { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+.reminder-due { font-size: 11px; color: var(--text-dim); white-space: nowrap; text-align: center; }
 .reminder-item button {
   background: none;
   border: none;
@@ -356,7 +358,7 @@ input[type="datetime-local"] {
 .reminder-item button:hover { color: var(--danger); }
 
 /* Calendar */
-.calendar-nav { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.calendar-nav { display: flex; align-items: center; gap: 8px; font-size: 13px; text-align: center; }
 
 .calendar-grid { display: flex; flex-direction: column; gap: 2px; }
 
@@ -593,7 +595,7 @@ input[type="datetime-local"] {
   text-align: center;
 }
 .note-locked-icon svg { width: 22px; height: 22px; opacity: 0.7; }
-.note-card-meta { font-size: 11px; color: var(--text-dim); opacity: 0.7; }
+.note-card-meta { font-size: 11px; color: var(--text-dim); opacity: 0.7; text-align: center; }
 
 /* ---------- Modal extras ---------- */
 .modal-content textarea {
@@ -678,6 +680,7 @@ input[type="datetime-local"] {
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 2px 8px;
+  text-align: center;
 }
 .study-card.status-complete .study-card-title { text-decoration: line-through; color: var(--text-dim); }
 
@@ -902,3 +905,42 @@ input[type="datetime-local"] {
 .chat-usage-fill.warn { background: #ffd166; }
 .chat-usage-fill.danger { background: var(--danger); }
 .chat-usage-label { font-size: 10.5px; color: var(--text-dim); opacity: 0.75; text-align: right; }
+
+/* ---------- Password gate (client-side, see js/gate.js + api/auth.js) ---------- */
+html.gate-locked .app-shell,
+html.gate-locked .chat-fab,
+html.gate-locked .chat-panel { display: none !important; }
+html:not(.gate-locked) #gate-overlay { display: none; }
+
+#gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gate-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 320px;
+  padding: 0 20px;
+}
+.gate-form input[type="password"] {
+  width: 100%;
+  height: 46px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 16px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.gate-form input[type="password"]:focus { outline: none; border-color: var(--accent); }
+.gate-error { color: var(--danger); font-size: 13px; margin: 0; min-height: 16px; }
