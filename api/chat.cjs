@@ -20,6 +20,21 @@ const SYSTEM_PROMPT = 'You Are A Helpful, Concise Assistant Embedded In A Person
 const MAX_HISTORY = 20;
 const MAX_CONTEXT_ITEMS = 30;
 
+// Groq's requests-per-day usage, read straight off the response headers (see
+// https://console.groq.com/docs/rate-limits) — present on every response,
+// success or failure, so the frontend can render a "daily usage" bar.
+function extractUsage(headers) {
+  const limit = headers.get('x-ratelimit-limit-requests');
+  const remaining = headers.get('x-ratelimit-remaining-requests');
+  const reset = headers.get('x-ratelimit-reset-requests');
+  if (limit === null || remaining === null) return null;
+  return {
+    limitRequests: Number(limit),
+    remainingRequests: Number(remaining),
+    resetRequests: reset || null
+  };
+}
+
 module.exports = async function handler(req, res) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -71,15 +86,30 @@ module.exports = async function handler(req, res) {
       })
     });
 
-    const data = await groqRes.json();
+    const usage = extractUsage(groqRes.headers);
+
+    // Groq normally returns JSON even on errors, but if something upstream
+    // (a proxy, a 5xx from an edge node, etc.) returns plain text/HTML
+    // instead, don't let that throw and produce an opaque 500 — read it as
+    // text and surface it so the real problem is visible in the UI.
+    const rawText = await groqRes.text();
+    let data = null;
+    try {
+      data = rawText ? JSON.parse(rawText) : null;
+    } catch {
+      // not JSON — data stays null, handled below
+    }
 
     if (!groqRes.ok) {
-      res.status(groqRes.status).json({ error: data?.error?.message || 'Groq Request Failed.' });
+      const message = data?.error?.message
+        || (rawText ? rawText.slice(0, 300) : null)
+        || `Groq Returned HTTP ${groqRes.status} With No Details.`;
+      res.status(groqRes.status).json({ error: message, usage });
       return;
     }
 
     const reply = data?.choices?.[0]?.message?.content || '';
-    res.status(200).json({ reply });
+    res.status(200).json({ reply, usage });
   } catch (err) {
     res.status(500).json({ error: 'Chat Request Failed.', detail: err.message });
   }

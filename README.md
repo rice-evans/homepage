@@ -33,6 +33,9 @@ Chat history, chat context, the sidebar's collapsed state, and the background co
 2. In the Vercel dashboard, open this project → **Settings** → **Environment Variables**, and add `GROQ_API_KEY` with your key.
 3. (Optional) Add `GROQ_MODEL` to override the default model. Defaults to `openai/gpt-oss-120b`. Check [console.groq.com/docs/models](https://console.groq.com/docs/models) if chat starts erroring — Groq periodically retires older models (`llama-3.3-70b-versatile`, for example, is being retired 08/16/26).
 4. Redeploy. Until `GROQ_API_KEY` is set, opening the chat button shows an inline message telling you it isn't configured yet — nothing else breaks.
+5. A thin bar along the bottom of the chat panel shows how much of Groq's daily request quota (RPD) is used, read straight from Groq's own rate-limit response headers — it fills in after your first message and turns yellow/red as you approach the limit.
+
+If chat or the Roblox lookup show an error, the message now includes the actual HTTP status/detail (e.g. an invalid API key, a Groq rate limit, or a Roblox timeout) instead of a generic one — check that text first, then the **Vercel Dashboard → your project → Logs** for the full server-side error.
 
 ### Enabling the password gate (optional)
 

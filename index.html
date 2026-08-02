@@ -204,7 +204,7 @@
       <h2>AI Chat</h2>
       <div class="chat-panel-actions">
         <button class="btn-icon" id="chat-context-btn" title="Chat Context">
-          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1L4.7 4.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="6.5" r="0.9" fill="currentColor"/></svg>
         </button>
         <button class="btn-icon" id="chat-clear-btn" title="Clear Chat">&times;</button>
         <button class="btn-icon" id="chat-close-btn" title="Close">&darr;</button>
@@ -216,6 +216,10 @@
       <textarea id="chat-input" placeholder="Ask Anything..." rows="1" required></textarea>
       <button type="submit" class="btn" id="chat-send-btn">Send</button>
     </form>
+    <div class="chat-usage" id="chat-usage" hidden>
+      <div class="chat-usage-bar"><div class="chat-usage-fill" id="chat-usage-fill"></div></div>
+      <span class="chat-usage-label" id="chat-usage-label"></span>
+    </div>
   </div>
 
   <!-- Chat context modal — Q&A pairs sent along with every chat request -->

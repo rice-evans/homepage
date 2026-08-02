@@ -4,14 +4,37 @@
 // avatar, friend/follower counts, groups, badge count, and public experiences.
 // Nothing here requires or uses Roblox credentials — it only surfaces data
 // Roblox already exposes to anyone who visits the profile page.
+//
+// Two defensive additions on top of the original version:
+//  - A browser-like User-Agent header on every outgoing request. Some of
+//    Roblox's endpoints are fronted by bot protection that's more likely to
+//    challenge/block requests with no User-Agent at all (which is what
+//    Node's fetch sends by default) — this is the most common reason a
+//    request like this works from a browser but not from a server.
+//  - A per-request timeout (8s) via AbortController, so one slow upstream
+//    call can't drag the whole function past Vercel's execution limit and
+//    have the platform kill it with a non-JSON timeout page instead of us
+//    returning a clean JSON error.
+const REQUEST_TIMEOUT_MS = 8000;
+const DEFAULT_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+};
 
-async function safeFetchJson(url, opts) {
+async function safeFetchJson(url, opts = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    const res = await fetch(url, opts);
+    const res = await fetch(url, {
+      ...opts,
+      headers: { ...DEFAULT_HEADERS, ...(opts.headers || {}) },
+      signal: controller.signal
+    });
     if (!res.ok) return null;
     return await res.json();
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -31,7 +54,7 @@ module.exports = async function handler(req, res) {
 
     const match = resolve && resolve.data && resolve.data[0];
     if (!match) {
-      res.status(404).json({ error: `No Roblox Account Found For Username "${username}".` });
+      res.status(404).json({ error: `No Roblox Account Found For Username "${username}". (If This Keeps Happening For A Username You Know Exists, Roblox May Be Rate-Limiting This Server — Try Again In A Minute.)` });
       return;
     }
     const userId = match.id;

@@ -90,17 +90,29 @@ const Roblox = (() => {
 
       try {
         const res = await fetch(`/api/roblox?username=${encodeURIComponent(username)}`);
-        const data = await res.json();
+
+        let data;
+        try {
+          data = await res.json();
+        } catch {
+          // The response wasn't JSON at all — usually means the request
+          // never reached our function (e.g. a platform timeout/error page,
+          // or this really is being opened without the /api routes, like a
+          // plain file:// page). Surface the HTTP status so it's obvious
+          // which case it is.
+          status.innerHTML = `<span class="rbx-error">Unexpected Response (HTTP ${res.status}) — Is This Running On Vercel (Or "Vercel Dev")? The Lookup Needs The /api Function.</span>`;
+          return;
+        }
 
         if (!res.ok) {
-          status.innerHTML = `<span class="rbx-error">${escapeHtml(data.error || 'Lookup Failed.')}</span>`;
+          status.innerHTML = `<span class="rbx-error">${escapeHtml(data.error || `Lookup Failed (HTTP ${res.status}).`)}</span>`;
           return;
         }
 
         status.textContent = '';
         render(data);
       } catch (err) {
-        status.innerHTML = `<span class="rbx-error">Network Error — Is This Running On Vercel (Or "Vercel Dev")? The Lookup Needs The /api Function.</span>`;
+        status.innerHTML = `<span class="rbx-error">Network Error: ${escapeHtml(err.message || 'Could Not Reach The Server.')}</span>`;
       }
     });
   }

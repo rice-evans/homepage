@@ -884,3 +884,22 @@ input[type="datetime-local"] {
 .context-item-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
 .context-item-q { font-weight: 600; margin-bottom: 2px; }
 .context-item-a { color: var(--text-dim); white-space: pre-wrap; }
+
+/* ---------- Chat daily usage bar ---------- */
+.chat-usage { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.chat-usage-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.chat-usage-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+.chat-usage-fill.warn { background: #ffd166; }
+.chat-usage-fill.danger { background: var(--danger); }
+.chat-usage-label { font-size: 10.5px; color: var(--text-dim); opacity: 0.75; text-align: right; }

@@ -50,6 +50,27 @@ const Chat = (() => {
     el.hidden = false;
   }
 
+  // Groq's daily request-usage, read off response headers server-side (see
+  // api/chat.cjs) and rendered as a subtle bar along the bottom of the
+  // panel. Only appears once we've actually heard back from Groq at least
+  // once — there's nothing to show before that.
+  function renderUsage(usage) {
+    const wrap = document.getElementById('chat-usage');
+    if (!usage || !usage.limitRequests) { wrap.hidden = true; return; }
+
+    const used = Math.max(0, usage.limitRequests - usage.remainingRequests);
+    const pct = Math.min(100, Math.round((used / usage.limitRequests) * 100));
+
+    const fill = document.getElementById('chat-usage-fill');
+    fill.style.width = `${pct}%`;
+    fill.classList.toggle('warn', pct >= 70 && pct < 90);
+    fill.classList.toggle('danger', pct >= 90);
+
+    document.getElementById('chat-usage-label').textContent =
+      `${used.toLocaleString()} / ${usage.limitRequests.toLocaleString()} Requests Today`;
+    wrap.hidden = false;
+  }
+
   function renderMessages(messages, pendingText) {
     const container = document.getElementById('chat-messages');
     container.innerHTML = '';
@@ -101,8 +122,9 @@ const Chat = (() => {
       }
 
       if (!res.ok) {
-        setStatus(data.error || 'Something Went Wrong Talking To Groq.', true);
+        setStatus(data.error || `Something Went Wrong Talking To Groq (HTTP ${res.status}).`, true);
         renderMessages(messages);
+        renderUsage(data.usage);
         return;
       }
 
@@ -110,8 +132,9 @@ const Chat = (() => {
       messages.push({ role: 'assistant', content: data.reply || '(Empty Response)' });
       save(messages);
       renderMessages(messages);
-    } catch {
-      setStatus('Network Error — Could Not Reach The Server.', true);
+      renderUsage(data.usage);
+    } catch (err) {
+      setStatus(`Network Error: ${err.message || 'Could Not Reach The Server.'}`, true);
       renderMessages(messages);
     } finally {
       sending = false;
