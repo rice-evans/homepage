@@ -87,6 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   Notes.init();
   Chat.init();
   Roblox.init();
+  Timetable.init();
+  Weather.init();
   Settings.init();
   Sidebar.init();
 

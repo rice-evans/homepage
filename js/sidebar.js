@@ -6,7 +6,7 @@
 // remembered in localStorage.
 const Sidebar = (() => {
   const COLLAPSE_KEY = 'homepage_sidebar_collapsed';
-  const VIEWS = ['home', 'notes', 'study', 'roblox'];
+  const VIEWS = ['home', 'notes', 'study', 'timetable', 'weather', 'roblox'];
   const DEFAULT_VIEW = 'home';
 
   function currentView() {
@@ -21,10 +21,13 @@ const Sidebar = (() => {
     document.querySelectorAll('#sidebar-nav .nav-item').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.view === name);
     });
-    // Some views (Calendar month grid on Home, Study board) only need to
-    // lay themselves out once they're actually visible.
+    // Some views (Calendar month grid on Home, Study board, Timetable,
+    // Weather) only need to lay themselves out / fetch data once they're
+    // actually visible.
     if (name === 'home' && typeof Calendar !== 'undefined' && Calendar.refresh) Calendar.refresh();
     if (name === 'study' && typeof Study !== 'undefined' && Study.refresh) Study.refresh();
+    if (name === 'timetable' && typeof Timetable !== 'undefined' && Timetable.refresh) Timetable.refresh();
+    if (name === 'weather' && typeof Weather !== 'undefined' && Weather.ensureLoaded) Weather.ensureLoaded();
   }
 
   function navigate(name) {
