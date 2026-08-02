@@ -65,6 +65,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateClock();
   setInterval(updateClock, 1000 * 30);
 
+  // Belt-and-braces on top of the min/max="...-9999-12-31" attributes on
+  // each date input: if a browser ever lets the year segment grow past 4
+  // digits while typing, clear the (now invalid-looking) value rather than
+  // letting a 5+ digit year linger.
+  document.querySelectorAll('input[type="date"]').forEach(input => {
+    input.addEventListener('input', () => {
+      if (input.value && input.value.split('-')[0].length > 4) input.value = '';
+    });
+  });
+
   // Pull any previously synced state (Vercel KV) before the widgets render
   // from localStorage, so a second device sees the same dashboard.
   await Sync.pull();
@@ -77,12 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   Notes.init();
   Chat.init();
   Roblox.init();
+  Settings.init();
   Sidebar.init();
 
-  Grainient.init(document.getElementById('grainient-bg'), {
-    color1: '#000000',
-    color2: '#3d4249',
-    color3: '#94a3b8'
-  });
   GlassSurface.applyToAll('.panel');
 });

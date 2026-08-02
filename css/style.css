@@ -72,10 +72,8 @@ button, input, select, textarea {
 
 .sidebar-top { padding: 22px 18px 10px; }
 .sidebar-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; }
-.sidebar-brand-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 .sidebar.collapsed .sidebar-brand-text,
-.sidebar.collapsed .nav-label,
-.sidebar.collapsed .sidebar-hint { display: none; }
+.sidebar.collapsed .nav-label { display: none; }
 
 .sidebar-nav { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; flex: 1; overflow-y: auto; overflow-x: hidden; }
 .nav-item {
@@ -100,16 +98,18 @@ button, input, select, textarea {
 .nav-icon svg { width: 20px; height: 20px; }
 .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
 
-.sidebar-bottom { padding: 10px 18px 18px; }
-.sidebar-hint { font-size: 11px; color: var(--text-dim); line-height: 1.4; margin: 0; opacity: 0.65; }
+.sidebar-bottom { padding: 6px 12px 14px; }
 
+/* A plain click toggle, not a resize handle — no drag/select affordance. */
 .sidebar-resize-handle {
   position: absolute;
   top: 0;
   right: 0;
   width: 6px;
   height: 100%;
-  cursor: col-resize;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .sidebar-resize-handle:hover,
 .sidebar-resize-handle:active { background: var(--accent-dim); }
@@ -281,6 +281,7 @@ input[type="date"],
 input[type="time"],
 input[type="datetime-local"] {
   color-scheme: dark;
+  text-transform: uppercase;
 }
 
 /* Links */
@@ -372,7 +373,10 @@ input[type="datetime-local"] {
 .cal-week:first-of-type { border-top: none; margin-top: 0; }
 
 .cal-daynum {
-  height: 34px;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: 46px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -665,7 +669,6 @@ input[type="datetime-local"] {
 .cal-bar.cal-bar-study { background: #c792ea; }
 
 /* ---------- Chat ---------- */
-.panel-chat { display: flex; flex-direction: column; height: 68vh; }
 .chat-status {
   font-size: 13px;
   color: var(--text-dim);
@@ -720,3 +723,104 @@ input[type="datetime-local"] {
   font-size: 14px;
 }
 .chat-form .btn { flex-shrink: 0; }
+
+/* ---------- Settings ---------- */
+.settings-color-row { display: flex; gap: 16px; margin: 4px 0 4px; }
+.settings-color-row label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.settings-color-row input[type="color"] {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+}
+.settings-color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+.settings-color-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 7px; }
+
+/* ---------- Floating chat (available on every page) ---------- */
+.chat-fab {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #0f1216;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  z-index: 60;
+}
+.chat-fab:hover { filter: brightness(1.1); }
+.chat-fab svg { width: 24px; height: 24px; }
+
+.chat-panel {
+  position: fixed;
+  left: 20px;
+  bottom: 84px;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  height: 480px;
+  max-height: calc(100vh - 120px);
+  background: rgba(20, 24, 30, 0.85);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  z-index: 59;
+}
+.chat-panel-actions { display: flex; gap: 6px; }
+
+/* ---------- Confetti rain (Study items marked Complete) ---------- */
+.confetti-rain-piece {
+  position: fixed;
+  top: -20px;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 999;
+  animation: confetti-rain-fall linear forwards;
+}
+@keyframes confetti-rain-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(var(--fall-distance)) rotate(var(--rot)); opacity: 0.9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti-rain-piece { display: none; }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 640px) {
+  .topbar { padding: 18px 16px 8px; }
+  .content { padding: 12px 16px 24px; }
+  .modal-content { width: 320px; max-width: calc(100vw - 32px); }
+  .sidebar-resize-handle { width: 14px; }
+  .chat-fab { left: 14px; bottom: 14px; }
+  .chat-panel {
+    left: 14px;
+    right: 14px;
+    bottom: 78px;
+    width: auto;
+    max-width: none;
+    height: min(70vh, 480px);
+  }
+}

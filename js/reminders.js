@@ -68,35 +68,6 @@ const Reminders = (() => {
       });
   }
 
-  // Small confetti burst, no libraries — a handful of colored pieces that
-  // fly out from (x, y) and fade, then clean themselves up.
-  function burstConfetti(x, y) {
-    const colors = ['#7fa8ff', '#3ecf8e', '#ff5c5c', '#ffd166', '#f4a6ff'];
-    const count = 22;
-    for (let i = 0; i < count; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'confetti-piece';
-      piece.style.left = `${x}px`;
-      piece.style.top = `${y}px`;
-      piece.style.background = colors[i % colors.length];
-
-      const angle = Math.random() * Math.PI * 2;
-      const distance = 50 + Math.random() * 70;
-      const dx = Math.cos(angle) * distance;
-      const dy = Math.sin(angle) * distance - 30;
-      const rot = `${Math.random() * 720 - 360}deg`;
-
-      piece.style.setProperty('--dx', `${dx}px`);
-      piece.style.setProperty('--dy', `${dy}px`);
-      piece.style.setProperty('--rot', rot);
-
-      document.body.appendChild(piece);
-      piece.addEventListener('animationend', () => piece.remove());
-      // Safety net in case animationend doesn't fire (e.g. reduced-motion).
-      setTimeout(() => piece.remove(), 1200);
-    }
-  }
-
   function buildReminderItem(item, now) {
     const li = document.createElement('li');
     li.className = 'reminder-item';
@@ -116,7 +87,7 @@ const Reminders = (() => {
       save(all);
       if (checkbox.checked) {
         const rect = checkbox.getBoundingClientRect();
-        burstConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        Confetti.burst(rect.left + rect.width / 2, rect.top + rect.height / 2);
       }
       render();
       refreshCalendar();

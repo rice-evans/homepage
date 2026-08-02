@@ -1,7 +1,9 @@
-// AI Chat widget — talks to /api/chat, which proxies Groq server-side (see
-// api/chat.js) so the API key never touches the browser. History is kept in
-// localStorage only (not mirrored via Sync) so it doesn't bloat the shared
-// cross-device state; it's a local scratchpad, not dashboard data.
+// AI Chat widget — a small floating button (bottom-left) that opens a chat
+// popup, available from every page rather than being its own sidebar view.
+// Talks to /api/chat, which proxies Groq server-side (see api/chat.js) so
+// the API key never touches the browser. History is kept in localStorage
+// only (not mirrored via Sync) so it doesn't bloat the shared cross-device
+// state; it's a local scratchpad, not dashboard data.
 const Chat = (() => {
   const STORAGE_KEY = 'homepage_chat_history';
   const MAX_STORED = 40;
@@ -98,9 +100,24 @@ const Chat = (() => {
     }
   }
 
+  function openPanel() {
+    document.getElementById('chat-panel').hidden = false;
+    document.getElementById('chat-input').focus();
+  }
+
+  function closePanel() {
+    document.getElementById('chat-panel').hidden = true;
+  }
+
   function init() {
     const messages = load();
     renderMessages(messages);
+
+    document.getElementById('chat-fab').addEventListener('click', () => {
+      const panel = document.getElementById('chat-panel');
+      panel.hidden ? openPanel() : closePanel();
+    });
+    document.getElementById('chat-close-btn').addEventListener('click', closePanel);
 
     const input = document.getElementById('chat-input');
     input.addEventListener('input', () => autoGrow(input));

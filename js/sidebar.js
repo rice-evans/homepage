@@ -6,7 +6,7 @@
 // remembered in localStorage.
 const Sidebar = (() => {
   const COLLAPSE_KEY = 'homepage_sidebar_collapsed';
-  const VIEWS = ['home', 'calendar', 'notes', 'study', 'chat', 'roblox'];
+  const VIEWS = ['home', 'calendar', 'notes', 'study', 'roblox'];
   const DEFAULT_VIEW = 'home';
 
   function currentView() {
@@ -18,7 +18,7 @@ const Sidebar = (() => {
     document.querySelectorAll('.view').forEach(section => {
       section.classList.toggle('active', section.dataset.view === name);
     });
-    document.querySelectorAll('.nav-item').forEach(btn => {
+    document.querySelectorAll('#sidebar-nav .nav-item').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.view === name);
     });
     // Some views (Calendar month grid, Study board) only need to lay
@@ -38,7 +38,13 @@ const Sidebar = (() => {
   function initCollapse() {
     const sidebar = document.getElementById('sidebar');
     const handle = document.getElementById('sidebar-toggle');
-    if (localStorage.getItem(COLLAPSE_KEY) === '1') sidebar.classList.add('collapsed');
+    const stored = localStorage.getItem(COLLAPSE_KEY);
+
+    // On a phone-sized screen, default to collapsed (icons-only) so the
+    // sidebar doesn't dominate the viewport — but only the first time, i.e.
+    // only when the user hasn't explicitly chosen a state yet.
+    const shouldCollapse = stored === null ? window.matchMedia('(max-width: 640px)').matches : stored === '1';
+    sidebar.classList.toggle('collapsed', shouldCollapse);
 
     handle.addEventListener('click', () => {
       const collapsed = sidebar.classList.toggle('collapsed');
@@ -47,7 +53,10 @@ const Sidebar = (() => {
   }
 
   function init() {
-    document.querySelectorAll('.nav-item').forEach(btn => {
+    // Scoped to the <nav> itself — the Settings button at the bottom of the
+    // sidebar reuses the .nav-item look but isn't a page/view, so it's
+    // handled entirely by js/settings.js instead.
+    document.querySelectorAll('#sidebar-nav .nav-item').forEach(btn => {
       btn.addEventListener('click', () => navigate(btn.dataset.view));
     });
     window.addEventListener('hashchange', () => showView(currentView()));

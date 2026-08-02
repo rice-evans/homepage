@@ -110,11 +110,13 @@ const Study = (() => {
       const items = load();
       const target = items.find(x => x.id === dragSrcId);
       if (target && target.status !== status) {
+        const justCompleted = status === 'complete' && target.status !== 'complete';
         target.status = status;
         target.updatedAt = Date.now();
         save(items);
         render();
         refreshCalendar();
+        if (justCompleted) Confetti.rain();
       }
       dragSrcId = null;
     });
@@ -187,10 +189,15 @@ const Study = (() => {
       const notes = document.getElementById('study-notes').value.trim();
 
       const items = load();
+      let justCompleted = false;
       if (editingId) {
         const target = items.find(x => x.id === editingId);
-        if (target) Object.assign(target, { title, status, date, time, duration, notes, updatedAt: Date.now() });
+        if (target) {
+          justCompleted = status === 'complete' && target.status !== 'complete';
+          Object.assign(target, { title, status, date, time, duration, notes, updatedAt: Date.now() });
+        }
       } else {
+        justCompleted = status === 'complete';
         items.push({
           id: crypto.randomUUID(),
           title, status, date, time, duration, notes,
@@ -202,6 +209,7 @@ const Study = (() => {
       closeModal();
       render();
       refreshCalendar();
+      if (justCompleted) Confetti.rain();
     });
 
     document.getElementById('study-delete').addEventListener('click', () => {

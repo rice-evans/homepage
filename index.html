@@ -15,7 +15,6 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
         <div class="sidebar-brand">
-          <span class="sidebar-brand-dot"></span>
           <span class="sidebar-brand-text">Home</span>
         </div>
       </div>
@@ -45,12 +44,6 @@
           </span>
           <span class="nav-label">Study</span>
         </button>
-        <button class="nav-item" data-view="chat" title="Chat">
-          <span class="nav-icon">
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2V12c0 1.1-.9 2-2 2H8l-4 3v-3H5c-1.1 0-2-.9-2-2V5.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-          </span>
-          <span class="nav-label">Chat</span>
-        </button>
         <button class="nav-item" data-view="roblox" title="Roblox Lookup">
           <span class="nav-icon">
             <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="12" height="12" rx="2" transform="rotate(15 10 10)" stroke="currentColor" stroke-width="1.5"/></svg>
@@ -60,10 +53,15 @@
       </nav>
 
       <div class="sidebar-bottom">
-        <p class="sidebar-hint">Drag border to<br>collapse</p>
+        <button class="nav-item" id="open-settings-btn" title="Settings">
+          <span class="nav-icon">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1L4.7 4.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </button>
       </div>
 
-      <div class="sidebar-resize-handle" id="sidebar-toggle" title="Collapse sidebar"></div>
+      <div class="sidebar-resize-handle" id="sidebar-toggle" title="Collapse Sidebar"></div>
     </aside>
 
     <!-- Main column -->
@@ -93,7 +91,7 @@
             </div>
             <form id="reminder-form" class="inline-form">
               <input type="text" id="reminder-text" placeholder="New Reminder..." required>
-              <input type="date" id="reminder-due-date" title="Due Date (Optional)">
+              <input type="date" id="reminder-due-date" title="Due Date (Optional)" min="1000-01-01" max="9999-12-31">
               <input type="time" id="reminder-due-time" title="Due Time (Optional)">
               <button type="submit" class="btn">Add</button>
             </form>
@@ -121,8 +119,8 @@
               <ul class="event-list" id="calendar-event-list"></ul>
               <form id="calendar-event-form" class="inline-form">
                 <input type="text" id="calendar-event-text" placeholder="Add Event..." required>
-                <label class="mini-label">From<input type="date" id="calendar-event-start" required></label>
-                <label class="mini-label">To<input type="date" id="calendar-event-end"></label>
+                <label class="mini-label">From<input type="date" id="calendar-event-start" required min="1000-01-01" max="9999-12-31"></label>
+                <label class="mini-label">To<input type="date" id="calendar-event-end" min="1000-01-01" max="9999-12-31"></label>
                 <button type="submit" class="btn">Add</button>
               </form>
             </div>
@@ -164,22 +162,6 @@
           </section>
         </section>
 
-        <!-- Chat view -->
-        <section class="view" id="view-chat" data-view="chat">
-          <section class="panel panel-wide panel-chat" id="panel-chat">
-            <div class="panel-header">
-              <h2>AI Chat</h2>
-              <button class="btn-icon" id="chat-clear-btn" title="Clear Chat">&times;</button>
-            </div>
-            <div class="chat-status" id="chat-status" hidden></div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <form id="chat-form" class="chat-form">
-              <textarea id="chat-input" placeholder="Ask Anything... (Enter To Send, Shift+Enter For A New Line)" rows="1" required></textarea>
-              <button type="submit" class="btn" id="chat-send-btn">Send</button>
-            </form>
-          </section>
-        </section>
-
         <!-- Roblox view -->
         <section class="view" id="view-roblox" data-view="roblox">
           <section class="panel panel-wide" id="panel-roblox">
@@ -197,6 +179,26 @@
 
       </main>
     </div>
+  </div>
+
+  <!-- Floating AI Chat widget — available on every page -->
+  <button class="chat-fab" id="chat-fab" title="AI Chat">
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2V12c0 1.1-.9 2-2 2H8l-4 3v-3H5c-1.1 0-2-.9-2-2V5.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+  </button>
+  <div class="chat-panel" id="chat-panel" hidden>
+    <div class="panel-header">
+      <h2>AI Chat</h2>
+      <div class="chat-panel-actions">
+        <button class="btn-icon" id="chat-clear-btn" title="Clear Chat">&times;</button>
+        <button class="btn-icon" id="chat-close-btn" title="Close">&darr;</button>
+      </div>
+    </div>
+    <div class="chat-status" id="chat-status" hidden></div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <form id="chat-form" class="chat-form">
+      <textarea id="chat-input" placeholder="Ask Anything..." rows="1" required></textarea>
+      <button type="submit" class="btn" id="chat-send-btn">Send</button>
+    </form>
   </div>
 
   <!-- Add/Edit link modal -->
@@ -262,7 +264,7 @@
           </select>
         </label>
         <div class="modal-row">
-          <label>Date<input type="date" id="study-date"></label>
+          <label>Date<input type="date" id="study-date" min="1000-01-01" max="9999-12-31"></label>
           <label>Time<input type="time" id="study-time"></label>
         </div>
         <label>Duration (Minutes)<input type="number" id="study-duration" min="0" step="5" placeholder="e.g. 45"></label>
@@ -276,9 +278,28 @@
     </div>
   </div>
 
+  <!-- Settings modal (live background colors) -->
+  <div class="modal" id="settings-modal" hidden>
+    <div class="modal-content">
+      <h3>Settings</h3>
+      <p class="modal-note">Background Colors — Changes Apply Live.</p>
+      <div class="settings-color-row">
+        <label>Top<input type="color" id="settings-color1"></label>
+        <label>Middle<input type="color" id="settings-color2"></label>
+        <label>Base<input type="color" id="settings-color3"></label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="settings-reset">Reset</button>
+        <button type="button" class="btn" id="settings-close">Done</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/grainient.js"></script>
   <script src="js/glass-surface.js"></script>
   <script src="js/sync.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/settings.js"></script>
   <script src="js/sidebar.js"></script>
   <script src="js/reminders.js"></script>
   <script src="js/study.js"></script>

@@ -212,22 +212,35 @@ void main(){
 
     let raf = 0;
     let running = true;
+    let destroyed = false;
     const t0 = performance.now();
     function frame(t) {
       gl.uniform1f(u.iTime, (t - t0) * 0.001);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       raf = requestAnimationFrame(frame);
     }
-    function start() { if (!raf && running) raf = requestAnimationFrame(frame); }
+    function start() { if (!raf && running && !destroyed) raf = requestAnimationFrame(frame); }
     function stop() { if (raf) { cancelAnimationFrame(raf); raf = 0; } }
 
-    document.addEventListener('visibilitychange', () => {
+    function onVisibility() {
       running = !document.hidden;
       running ? start() : stop();
-    });
+    }
+    document.addEventListener('visibilitychange', onVisibility);
     start();
 
-    return { start, stop };
+    // Lets callers (e.g. live theme changes) tear this instance down cleanly
+    // before creating a new one with different colors, instead of leaking
+    // rAF loops / ResizeObservers / canvases.
+    function destroy() {
+      destroyed = true;
+      stop();
+      ro.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+      canvas.remove();
+    }
+
+    return { start, stop, destroy };
   }
 
   return { init };
