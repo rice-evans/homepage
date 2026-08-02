@@ -3,10 +3,15 @@
 // columns to change status, or edited via the modal. Items with a date also
 // show up on the Calendar (see loadAsCalendarEvents, consumed by
 // js/calendar.js) as a read-only entry — manage them from here.
+//
+// Deleting an item is a soft delete: it moves into a collapsible "Deleted"
+// section (its status/column is untouched) instead of disappearing, and can
+// be restored back to that same column or removed for good from there.
 const Study = (() => {
   const STORAGE_KEY = 'homepage_study';
   const STATUSES = ['not-started', 'in-progress', 'complete'];
-  const STATUS_LABEL = { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'complete': 'Complete' };
+
+  const ICON_RESTORE = '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10a6 6 0 1 1 1.8 4.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 6v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   let editingId = null;
   let dragSrcId = null;
@@ -50,10 +55,11 @@ const Study = (() => {
     return `${m}m`;
   }
 
-  // Exposed for the Calendar widget.
+  // Exposed for the Calendar widget. Deleted items don't show on the
+  // Calendar until restored.
   function loadAsCalendarEvents() {
     return load()
-      .filter(s => s.date)
+      .filter(s => s.date && !s.deleted)
       .map(s => ({
         id: `study-${s.id}`,
         text: `📚 ${s.title}`,
@@ -84,6 +90,36 @@ const Study = (() => {
   function closeModal() {
     document.getElementById('study-modal').hidden = true;
     editingId = null;
+  }
+
+  // ---------- soft delete ----------
+
+  function softDelete(id) {
+    const items = load();
+    const item = items.find(x => x.id === id);
+    if (!item) return;
+    item.deleted = true;
+    item.deletedAt = Date.now();
+    save(items);
+    render();
+    refreshCalendar();
+  }
+
+  function restore(id) {
+    const items = load();
+    const item = items.find(x => x.id === id);
+    if (!item) return;
+    item.deleted = false;
+    item.deletedAt = null;
+    save(items);
+    render();
+    refreshCalendar();
+  }
+
+  function destroyForever(id) {
+    if (!confirm('Permanently delete this study item? This cannot be undone.')) return;
+    save(load().filter(x => x.id !== id));
+    render();
   }
 
   // ---------- drag & drop between columns ----------
@@ -154,18 +190,72 @@ const Study = (() => {
     return card;
   }
 
+  function buildDeletedCard(item) {
+    const card = document.createElement('div');
+    card.className = 'study-card study-card-deleted';
+
+    const title = document.createElement('div');
+    title.className = 'study-card-title';
+    title.textContent = item.title;
+    card.appendChild(title);
+
+    const badges = document.createElement('div');
+    badges.className = 'study-card-badges';
+    const statusBadge = document.createElement('span');
+    statusBadge.className = 'study-badge';
+    statusBadge.textContent = { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'complete': 'Complete' }[item.status] || item.status;
+    badges.appendChild(statusBadge);
+    if (item.date) {
+      const b = document.createElement('span');
+      b.className = 'study-badge';
+      b.textContent = formatDate(item.date);
+      badges.appendChild(b);
+    }
+    card.appendChild(badges);
+
+    const actions = document.createElement('div');
+    actions.className = 'study-card-actions';
+
+    const restoreBtn = document.createElement('button');
+    restoreBtn.type = 'button';
+    restoreBtn.className = 'icon-btn';
+    restoreBtn.innerHTML = ICON_RESTORE;
+    restoreBtn.title = 'Restore';
+    restoreBtn.addEventListener('click', () => restore(item.id));
+    actions.appendChild(restoreBtn);
+
+    const foreverBtn = document.createElement('button');
+    foreverBtn.type = 'button';
+    foreverBtn.className = 'btn btn-danger btn-small';
+    foreverBtn.textContent = 'Delete Forever';
+    foreverBtn.addEventListener('click', () => destroyForever(item.id));
+    actions.appendChild(foreverBtn);
+
+    card.appendChild(actions);
+    return card;
+  }
+
   function render() {
-    const items = load();
+    const all = load();
+
     STATUSES.forEach(status => {
       const list = document.getElementById(`study-list-${status}`);
       const count = document.getElementById(`study-count-${status}`);
       list.innerHTML = '';
-      const inStatus = items
-        .filter(i => i.status === status)
+      const inStatus = all
+        .filter(i => i.status === status && !i.deleted)
         .sort((a, b) => (a.date || '9999').localeCompare(b.date || '9999') || (a.time || '').localeCompare(b.time || ''));
       inStatus.forEach(item => list.appendChild(buildCard(item)));
       count.textContent = inStatus.length;
     });
+
+    const deleted = all.filter(i => i.deleted).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
+    const deletedSection = document.getElementById('study-deleted-section');
+    const deletedList = document.getElementById('study-deleted-list');
+    document.getElementById('study-deleted-count').textContent = deleted.length;
+    deletedSection.hidden = deleted.length === 0;
+    deletedList.innerHTML = '';
+    deleted.forEach(item => deletedList.appendChild(buildDeletedCard(item)));
   }
 
   function init() {
@@ -201,6 +291,8 @@ const Study = (() => {
         items.push({
           id: crypto.randomUUID(),
           title, status, date, time, duration, notes,
+          deleted: false,
+          deletedAt: null,
           createdAt: Date.now(),
           updatedAt: Date.now()
         });
@@ -214,10 +306,8 @@ const Study = (() => {
 
     document.getElementById('study-delete').addEventListener('click', () => {
       if (!editingId) return;
-      save(load().filter(x => x.id !== editingId));
+      softDelete(editingId);
       closeModal();
-      render();
-      refreshCalendar();
     });
 
     render();

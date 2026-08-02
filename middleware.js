@@ -4,12 +4,12 @@
 // (not just a client-side overlay someone could bypass in devtools).
 //
 // If SITE_PASSWORD isn't set, this is a no-op (fails open) — same "optional,
-// nothing breaks until configured" pattern as /api/data.js and /api/chat.js.
+// nothing breaks until configured" pattern as api/data.cjs and api/chat.cjs.
 //
-// This file must stay ES modules (import/export) per Vercel's Routing
-// Middleware requirements for non-framework projects — hence the .mjs
-// extension rather than .js, so it doesn't collide with the CommonJS
-// (`module.exports`) style used by the plain serverless functions in api/.
+// This file uses ES module import/export, which is why package.json now has
+// "type": "module" — and why the plain serverless functions in api/ were
+// renamed from .js to .cjs, so they keep loading as CommonJS
+// (`module.exports`) regardless of that project-wide setting.
 import { next } from '@vercel/functions';
 
 const COOKIE_NAME = 'homepage_auth';
@@ -86,6 +86,21 @@ function gatePage({ error } = {}) {
 }
 
 export default async function middleware(request) {
+  const url = new URL(request.url);
+
+  // Logout: always clear the auth cookie and bounce back to "/", regardless
+  // of current auth state (so a stale/expired session can still log out
+  // cleanly) or whether SITE_PASSWORD is even configured right now.
+  if (url.pathname === '/logout') {
+    return new Response(null, {
+      status: 303,
+      headers: {
+        Location: '/',
+        'Set-Cookie': `${COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`
+      }
+    });
+  }
+
   const password = process.env.SITE_PASSWORD;
   if (!password) return next();
 

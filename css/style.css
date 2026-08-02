@@ -89,11 +89,14 @@ button, input, select, textarea {
   font-size: 14px;
   font-family: inherit;
   text-align: left;
+  text-decoration: none;
   width: 100%;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 .nav-item:hover { background: var(--panel-alt); color: var(--text); }
 .nav-item.active { background: var(--accent-dim); color: var(--text); }
+.nav-item-danger:hover { background: rgba(255, 92, 92, 0.14); color: var(--danger); }
 .nav-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: inherit; }
 .nav-icon svg { width: 20px; height: 20px; }
 .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
@@ -373,10 +376,7 @@ input[type="datetime-local"] {
 .cal-week:first-of-type { border-top: none; margin-top: 0; }
 
 .cal-daynum {
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  max-width: 46px;
-  margin: 0 auto;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -558,6 +558,21 @@ input[type="datetime-local"] {
 }
 .note-card-actions button:hover { color: var(--text); }
 .note-card-actions .note-delete-btn:hover { color: var(--danger); }
+
+/* Generic small icon button — used by Notes and Study action rows. */
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn:hover { color: var(--text); }
+.icon-btn svg { width: 16px; height: 16px; display: block; }
 .note-card-body {
   font-size: 13px;
   color: var(--text-dim);
@@ -572,11 +587,13 @@ input[type="datetime-local"] {
   color: var(--text-dim);
   font-style: italic;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   text-align: center;
-  filter: blur(0.2px);
 }
+.note-locked-icon svg { width: 22px; height: 22px; opacity: 0.7; }
 .note-card-meta { font-size: 11px; color: var(--text-dim); opacity: 0.7; }
 
 /* ---------- Modal extras ---------- */
@@ -750,7 +767,7 @@ input[type="datetime-local"] {
 /* ---------- Floating chat (available on every page) ---------- */
 .chat-fab {
   position: fixed;
-  left: 20px;
+  right: 20px;
   bottom: 20px;
   width: 52px;
   height: 52px;
@@ -770,7 +787,7 @@ input[type="datetime-local"] {
 
 .chat-panel {
   position: fixed;
-  left: 20px;
+  right: 20px;
   bottom: 84px;
   width: 360px;
   max-width: calc(100vw - 40px);
@@ -814,7 +831,7 @@ input[type="datetime-local"] {
   .content { padding: 12px 16px 24px; }
   .modal-content { width: 320px; max-width: calc(100vw - 32px); }
   .sidebar-resize-handle { width: 14px; }
-  .chat-fab { left: 14px; bottom: 14px; }
+  .chat-fab { right: 14px; bottom: 14px; }
   .chat-panel {
     left: 14px;
     right: 14px;
@@ -824,3 +841,46 @@ input[type="datetime-local"] {
     height: min(70vh, 480px);
   }
 }
+
+/* ---------- Deleted sections (Notes + Study) ---------- */
+.deleted-section { margin-top: 18px; }
+.deleted-section summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 6px 2px;
+  list-style: none;
+}
+.deleted-section summary::-webkit-details-marker { display: none; }
+.deleted-section summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 6px;
+  transition: transform 0.15s ease;
+}
+.deleted-section[open] summary::before { transform: rotate(90deg); }
+.deleted-section .notes-grid,
+.deleted-section .study-board { margin-top: 10px; }
+
+.note-card-deleted { opacity: 0.75; border-style: dashed; cursor: default; }
+.note-card-actions-row { justify-content: space-between; align-items: center; margin-top: 4px; }
+
+.btn-small { height: 28px; padding: 0 10px; font-size: 12px; }
+
+.study-card-deleted { opacity: 0.75; border-style: dashed; cursor: default; }
+.study-card-deleted .study-card-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; }
+
+/* ---------- Chat context (Q&A) ---------- */
+.context-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; margin: 10px 0; }
+.context-item {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.context-item-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.context-item-q { font-weight: 600; margin-bottom: 2px; }
+.context-item-a { color: var(--text-dim); white-space: pre-wrap; }

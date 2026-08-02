@@ -15,7 +15,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
         <div class="sidebar-brand">
-          <span class="sidebar-brand-text">Home</span>
+          <span class="sidebar-brand-text">Dashboard</span>
         </div>
       </div>
 
@@ -46,7 +46,7 @@
         </button>
         <button class="nav-item" data-view="roblox" title="Roblox Lookup">
           <span class="nav-icon">
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="12" height="12" rx="2" transform="rotate(15 10 10)" stroke="currentColor" stroke-width="1.5"/></svg>
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="14" height="14" rx="4" stroke="currentColor" stroke-width="1.5"/><rect x="7.3" y="7.3" width="5.4" height="5.4" rx="1" transform="rotate(12 10 10)" stroke="currentColor" stroke-width="1.4"/></svg>
           </span>
           <span class="nav-label">Roblox</span>
         </button>
@@ -59,6 +59,12 @@
           </span>
           <span class="nav-label">Settings</span>
         </button>
+        <a class="nav-item nav-item-danger" href="/logout" title="Log Out">
+          <span class="nav-icon">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 3H4.5v14H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 10H8.5M17 10l-3-3M17 10l-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="nav-label">Log Out</span>
+        </a>
       </div>
 
       <div class="sidebar-resize-handle" id="sidebar-toggle" title="Collapse Sidebar"></div>
@@ -135,6 +141,10 @@
               <button class="btn-icon" id="add-note-btn" title="Add Note">+</button>
             </div>
             <div class="notes-grid" id="notes-grid"></div>
+            <details class="deleted-section" id="notes-deleted-section" hidden>
+              <summary>Deleted (<span id="notes-deleted-count">0</span>)</summary>
+              <div class="notes-grid deleted-grid" id="notes-deleted-grid"></div>
+            </details>
           </section>
         </section>
 
@@ -159,6 +169,10 @@
                 <div class="study-col-list" id="study-list-complete" data-status="complete"></div>
               </div>
             </div>
+            <details class="deleted-section" id="study-deleted-section" hidden>
+              <summary>Deleted (<span id="study-deleted-count">0</span>)</summary>
+              <div class="study-col-list" id="study-deleted-list"></div>
+            </details>
           </section>
         </section>
 
@@ -189,6 +203,9 @@
     <div class="panel-header">
       <h2>AI Chat</h2>
       <div class="chat-panel-actions">
+        <button class="btn-icon" id="chat-context-btn" title="Chat Context">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1L4.7 4.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
         <button class="btn-icon" id="chat-clear-btn" title="Clear Chat">&times;</button>
         <button class="btn-icon" id="chat-close-btn" title="Close">&darr;</button>
       </div>
@@ -199,6 +216,23 @@
       <textarea id="chat-input" placeholder="Ask Anything..." rows="1" required></textarea>
       <button type="submit" class="btn" id="chat-send-btn">Send</button>
     </form>
+  </div>
+
+  <!-- Chat context modal — Q&A pairs sent along with every chat request -->
+  <div class="modal" id="chat-context-modal" hidden>
+    <div class="modal-content">
+      <h3>Chat Context</h3>
+      <p class="modal-note">Add Question/Answer Pairs The AI Should Know When Replying.</p>
+      <div class="context-list" id="chat-context-list"></div>
+      <form id="chat-context-form">
+        <label>Question<input type="text" id="chat-context-question" required></label>
+        <label>Answer<textarea id="chat-context-answer" rows="3" required></textarea></label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="chat-context-close">Done</button>
+          <button type="submit" class="btn">Add</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Add/Edit link modal -->

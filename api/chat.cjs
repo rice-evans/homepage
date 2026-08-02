@@ -9,10 +9,16 @@
 //
 // Until GROQ_API_KEY is set, this returns 501 and the frontend shows an
 // inline "not configured" message instead of erroring out.
+//
+// The request body can also include a `context` array of { question,
+// answer } pairs (managed from the gear icon in the chat panel) — these get
+// folded into the system prompt so the assistant has that background
+// information available when replying.
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const DEFAULT_MODEL = 'openai/gpt-oss-120b';
 const SYSTEM_PROMPT = 'You Are A Helpful, Concise Assistant Embedded In A Personal Homepage Dashboard. Keep Answers Brief Unless Asked For Detail.';
 const MAX_HISTORY = 20;
+const MAX_CONTEXT_ITEMS = 30;
 
 module.exports = async function handler(req, res) {
   const apiKey = process.env.GROQ_API_KEY;
@@ -30,6 +36,7 @@ module.exports = async function handler(req, res) {
     let body = req.body;
     if (typeof body === 'string') body = JSON.parse(body);
     const incoming = Array.isArray(body?.messages) ? body.messages : [];
+    const incomingContext = Array.isArray(body?.context) ? body.context : [];
 
     const messages = incoming
       .filter(m => m && typeof m.content === 'string' && (m.role === 'user' || m.role === 'assistant'))
@@ -41,6 +48,15 @@ module.exports = async function handler(req, res) {
       return;
     }
 
+    const contextPairs = incomingContext
+      .filter(c => c && typeof c.question === 'string' && typeof c.answer === 'string')
+      .slice(0, MAX_CONTEXT_ITEMS)
+      .map(c => `Q: ${c.question.slice(0, 500)}\nA: ${c.answer.slice(0, 1500)}`);
+
+    const systemPrompt = contextPairs.length
+      ? `${SYSTEM_PROMPT}\n\nBackground information you can use when relevant:\n${contextPairs.join('\n\n')}`
+      : SYSTEM_PROMPT;
+
     const groqRes = await fetch(GROQ_URL, {
       method: 'POST',
       headers: {
@@ -49,7 +65,7 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         model: process.env.GROQ_MODEL || DEFAULT_MODEL,
-        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
+        messages: [{ role: 'system', content: systemPrompt }, ...messages],
         temperature: 0.7,
         max_tokens: 1024
       })

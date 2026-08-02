@@ -1,11 +1,17 @@
-// AI Chat widget — a small floating button (bottom-left) that opens a chat
+// AI Chat widget — a small floating button (bottom-right) that opens a chat
 // popup, available from every page rather than being its own sidebar view.
-// Talks to /api/chat, which proxies Groq server-side (see api/chat.js) so
+// Talks to /api/chat, which proxies Groq server-side (see api/chat.cjs) so
 // the API key never touches the browser. History is kept in localStorage
 // only (not mirrored via Sync) so it doesn't bloat the shared cross-device
 // state; it's a local scratchpad, not dashboard data.
+//
+// The gear icon in the panel header opens a "Chat Context" modal where you
+// can add Question/Answer pairs — background info the AI should know about
+// (e.g. "Q: What's my Roblox username? A: ..."). These are sent along with
+// every request so the assistant can use them when replying.
 const Chat = (() => {
   const STORAGE_KEY = 'homepage_chat_history';
+  const CONTEXT_KEY = 'homepage_chat_context';
   const MAX_STORED = 40;
   let sending = false;
   let notConfigured = false;
@@ -21,6 +27,19 @@ const Chat = (() => {
 
   function save(messages) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-MAX_STORED)));
+  }
+
+  function loadContext() {
+    try {
+      const data = JSON.parse(localStorage.getItem(CONTEXT_KEY));
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveContext(items) {
+    localStorage.setItem(CONTEXT_KEY, JSON.stringify(items));
   }
 
   function setStatus(text, isError) {
@@ -68,7 +87,7 @@ const Chat = (() => {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages })
+        body: JSON.stringify({ messages, context: loadContext() })
       });
       const data = await res.json().catch(() => ({}));
 
@@ -109,6 +128,62 @@ const Chat = (() => {
     document.getElementById('chat-panel').hidden = true;
   }
 
+  // ---------- context (Q&A) modal ----------
+
+  function renderContextList() {
+    const list = document.getElementById('chat-context-list');
+    list.innerHTML = '';
+    const items = loadContext();
+    if (items.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'modal-note';
+      empty.textContent = 'No Context Added Yet.';
+      list.appendChild(empty);
+      return;
+    }
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'context-item';
+
+      const inner = document.createElement('div');
+      inner.className = 'context-item-row';
+
+      const text = document.createElement('div');
+      const q = document.createElement('div');
+      q.className = 'context-item-q';
+      q.textContent = item.question;
+      const a = document.createElement('div');
+      a.className = 'context-item-a';
+      a.textContent = item.answer;
+      text.appendChild(q);
+      text.appendChild(a);
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'icon-btn';
+      del.title = 'Remove';
+      del.textContent = '✕';
+      del.addEventListener('click', () => {
+        saveContext(loadContext().filter(x => x.id !== item.id));
+        renderContextList();
+      });
+
+      inner.appendChild(text);
+      inner.appendChild(del);
+      row.appendChild(inner);
+      list.appendChild(row);
+    });
+  }
+
+  function openContextModal() {
+    renderContextList();
+    document.getElementById('chat-context-modal').hidden = false;
+  }
+
+  function closeContextModal() {
+    document.getElementById('chat-context-modal').hidden = true;
+  }
+
   function init() {
     const messages = load();
     renderMessages(messages);
@@ -142,6 +217,25 @@ const Chat = (() => {
       save([]);
       setStatus('');
       renderMessages([]);
+    });
+
+    document.getElementById('chat-context-btn').addEventListener('click', openContextModal);
+    document.getElementById('chat-context-close').addEventListener('click', closeContextModal);
+    document.getElementById('chat-context-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const qInput = document.getElementById('chat-context-question');
+      const aInput = document.getElementById('chat-context-answer');
+      const question = qInput.value.trim();
+      const answer = aInput.value.trim();
+      if (!question || !answer) return;
+
+      const items = loadContext();
+      items.push({ id: crypto.randomUUID(), question, answer });
+      saveContext(items);
+      qInput.value = '';
+      aInput.value = '';
+      renderContextList();
+      qInput.focus();
     });
 
     // Probe configuration once up front so the input doesn't sit there

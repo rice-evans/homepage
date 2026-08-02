@@ -1,12 +1,21 @@
-// Notes widget — add/edit/delete notes, plus an optional PIN lock per note.
-// The PIN is never stored in plain text: it's hashed with SHA-256 (via
-// SubtleCrypto) and only the hash is kept in localStorage. This is enough to
-// stop a casual glance/accidental click, not real security — anyone with
-// devtools access to localStorage could brute-force a short PIN offline.
-// Locked notes hide their body and can't be edited or deleted until
-// unlocked (entering the correct PIN clears the lock).
+// Notes widget — add/edit notes, plus an optional PIN lock per note. The PIN
+// is never stored in plain text: it's hashed with SHA-256 (via SubtleCrypto)
+// and only the hash is kept in localStorage. This is enough to stop a
+// casual glance/accidental click, not real security — anyone with devtools
+// access to localStorage could brute-force a short PIN offline. Locked
+// notes hide their body and can't be edited until unlocked (entering the
+// correct PIN clears the lock).
+//
+// Deleting a note is a soft delete: it moves into a collapsible "Deleted"
+// section (lock state preserved) instead of disappearing, and can be
+// restored or removed for good from there.
 const Notes = (() => {
   const STORAGE_KEY = 'homepage_notes';
+
+  const ICON_LOCK = '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="9" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const ICON_UNLOCK = '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="9" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 9V6.5a3 3 0 0 1 5.7-1.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const ICON_TRASH = '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h12M8 6V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V6M6 6l.6 9.4a1 1 0 0 0 1 .9h4.8a1 1 0 0 0 1-.9L14 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ICON_RESTORE = '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10a6 6 0 1 1 1.8 4.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 6v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   let editingId = null;   // note-modal
   let pinContext = null;  // { mode: 'lock' | 'unlock', id }
@@ -132,8 +141,36 @@ const Notes = (() => {
     closePinModal();
     render();
     // Jump straight into editing — unlocking is almost always so the note
-    // can be read or changed.
-    openNoteModal(item);
+    // can be read or changed. (Not offered from the Deleted section.)
+    if (!item.deleted) openNoteModal(item);
+  }
+
+  // ---------- soft delete ----------
+
+  function softDelete(id) {
+    const items = load();
+    const item = items.find(x => x.id === id);
+    if (!item) return;
+    item.deleted = true;
+    item.deletedAt = Date.now();
+    save(items);
+    render();
+  }
+
+  function restore(id) {
+    const items = load();
+    const item = items.find(x => x.id === id);
+    if (!item) return;
+    item.deleted = false;
+    item.deletedAt = null;
+    save(items);
+    render();
+  }
+
+  function destroyForever(id) {
+    if (!confirm('Permanently delete this note? This cannot be undone.')) return;
+    save(load().filter(x => x.id !== id));
+    render();
   }
 
   // ---------- rendering ----------
@@ -155,7 +192,8 @@ const Notes = (() => {
 
     const lockBtn = document.createElement('button');
     lockBtn.type = 'button';
-    lockBtn.textContent = item.locked ? '🔒' : '🔓';
+    lockBtn.className = 'icon-btn';
+    lockBtn.innerHTML = item.locked ? ICON_LOCK : ICON_UNLOCK;
     lockBtn.title = item.locked ? 'Unlock Note' : 'Lock Note';
     lockBtn.addEventListener('click', e => {
       e.stopPropagation();
@@ -163,26 +201,33 @@ const Notes = (() => {
     });
     actions.appendChild(lockBtn);
 
-    if (!item.locked) {
-      const delBtn = document.createElement('button');
-      delBtn.type = 'button';
-      delBtn.className = 'note-delete-btn';
-      delBtn.textContent = '✕';
-      delBtn.title = 'Delete';
-      delBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        save(load().filter(x => x.id !== item.id));
-        render();
-      });
-      actions.appendChild(delBtn);
-    }
+    // Soft-delete is non-destructive, so it's available even on locked
+    // notes — the lock is preserved once it lands in the Deleted section.
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'icon-btn note-delete-btn';
+    delBtn.innerHTML = ICON_TRASH;
+    delBtn.title = 'Delete';
+    delBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      softDelete(item.id);
+    });
+    actions.appendChild(delBtn);
 
     head.appendChild(actions);
     card.appendChild(head);
 
     const body = document.createElement('div');
     body.className = 'note-card-body';
-    body.textContent = item.locked ? '🔒 Locked — click to unlock' : (item.body || '');
+    if (item.locked) {
+      const lockIcon = document.createElement('span');
+      lockIcon.className = 'note-locked-icon';
+      lockIcon.innerHTML = ICON_LOCK;
+      body.appendChild(lockIcon);
+      body.appendChild(document.createTextNode('Locked — Click To Unlock'));
+    } else {
+      body.textContent = item.body || '';
+    }
     card.appendChild(body);
 
     const meta = document.createElement('div');
@@ -201,11 +246,75 @@ const Notes = (() => {
     return card;
   }
 
+  function buildDeletedCard(item) {
+    const card = document.createElement('div');
+    card.className = 'note-card note-card-deleted' + (item.locked ? ' locked' : '');
+
+    const head = document.createElement('div');
+    head.className = 'note-card-head';
+
+    const title = document.createElement('div');
+    title.className = 'note-card-title';
+    title.textContent = item.locked ? 'Locked Note' : (item.title || 'Untitled');
+    head.appendChild(title);
+
+    if (item.locked) {
+      const lockIcon = document.createElement('span');
+      lockIcon.className = 'note-card-actions';
+      lockIcon.innerHTML = ICON_LOCK;
+      head.appendChild(lockIcon);
+    }
+    card.appendChild(head);
+
+    if (!item.locked) {
+      const body = document.createElement('div');
+      body.className = 'note-card-body';
+      body.textContent = item.body || '';
+      card.appendChild(body);
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'note-card-meta';
+    meta.textContent = `Deleted ${formatDate(item.deletedAt || item.updatedAt)}`;
+    card.appendChild(meta);
+
+    const actions = document.createElement('div');
+    actions.className = 'note-card-actions note-card-actions-row';
+
+    const restoreBtn = document.createElement('button');
+    restoreBtn.type = 'button';
+    restoreBtn.className = 'icon-btn';
+    restoreBtn.innerHTML = ICON_RESTORE;
+    restoreBtn.title = 'Restore';
+    restoreBtn.addEventListener('click', () => restore(item.id));
+    actions.appendChild(restoreBtn);
+
+    const foreverBtn = document.createElement('button');
+    foreverBtn.type = 'button';
+    foreverBtn.className = 'btn btn-danger btn-small';
+    foreverBtn.textContent = 'Delete Forever';
+    foreverBtn.addEventListener('click', () => destroyForever(item.id));
+    actions.appendChild(foreverBtn);
+
+    card.appendChild(actions);
+    return card;
+  }
+
   function render() {
+    const all = load();
+    const active = all.filter(n => !n.deleted).sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt));
+    const deleted = all.filter(n => n.deleted).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
+
     const grid = document.getElementById('notes-grid');
     grid.innerHTML = '';
-    const items = load().sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt));
-    items.forEach(item => grid.appendChild(buildCard(item)));
+    active.forEach(item => grid.appendChild(buildCard(item)));
+
+    const deletedSection = document.getElementById('notes-deleted-section');
+    const deletedGrid = document.getElementById('notes-deleted-grid');
+    document.getElementById('notes-deleted-count').textContent = deleted.length;
+    deletedSection.hidden = deleted.length === 0;
+    deletedGrid.innerHTML = '';
+    deleted.forEach(item => deletedGrid.appendChild(buildDeletedCard(item)));
   }
 
   function init() {
@@ -229,6 +338,8 @@ const Notes = (() => {
           body,
           locked: false,
           pinHash: null,
+          deleted: false,
+          deletedAt: null,
           createdAt: Date.now(),
           updatedAt: Date.now()
         });
@@ -240,9 +351,8 @@ const Notes = (() => {
 
     document.getElementById('note-delete').addEventListener('click', () => {
       if (!editingId) return;
-      save(load().filter(x => x.id !== editingId));
+      softDelete(editingId);
       closeNoteModal();
-      render();
     });
 
     document.getElementById('pin-cancel').addEventListener('click', closePinModal);
