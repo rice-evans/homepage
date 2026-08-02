@@ -72,8 +72,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   Links.init();
   Reminders.init();
+  Study.init();
   Calendar.init();
+  Notes.init();
+  Chat.init();
   Roblox.init();
+  Sidebar.init();
 
   Grainient.init(document.getElementById('grainient-bg'), {
     color1: '#000000',

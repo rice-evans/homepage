@@ -62,7 +62,8 @@ const Reminders = (() => {
           start: dateKey,
           end: dateKey,
           readOnly: true,
-          done: !!r.done
+          done: !!r.done,
+          kind: 'reminder'
         };
       });
   }

@@ -19,13 +19,16 @@ const Calendar = (() => {
     Sync.push();
   }
 
-  // Real calendar events plus reminders that have a due date (shown
-  // read-only — they're managed from the Reminders widget).
+  // Real calendar events plus reminders/study items that carry a due date
+  // (shown read-only — they're managed from their own widgets).
   function allEvents() {
     const reminderEvents = (typeof Reminders !== 'undefined' && Reminders.loadAsCalendarEvents)
       ? Reminders.loadAsCalendarEvents()
       : [];
-    return load().concat(reminderEvents);
+    const studyEvents = (typeof Study !== 'undefined' && Study.loadAsCalendarEvents)
+      ? Study.loadAsCalendarEvents()
+      : [];
+    return load().concat(reminderEvents, studyEvents);
   }
 
   function keyFor(d) {
@@ -145,7 +148,8 @@ const Calendar = (() => {
           bar.className = 'cal-bar';
           if (seg.contLeft) bar.classList.add('cont-left');
           if (seg.contRight) bar.classList.add('cont-right');
-          if (seg.event.readOnly) bar.classList.add('cal-bar-reminder');
+          if (seg.event.kind === 'study') bar.classList.add('cal-bar-study');
+          else if (seg.event.readOnly) bar.classList.add('cal-bar-reminder');
           if (seg.event.done) bar.classList.add('cal-bar-done');
           bar.style.gridColumn = `${seg.colStart + 1} / ${seg.colEnd + 2}`;
           bar.style.gridRow = `${seg.lane + 1}`;
@@ -201,7 +205,7 @@ const Calendar = (() => {
 
       if (ev.readOnly) {
         const tag = document.createElement('span');
-        tag.textContent = 'Reminder';
+        tag.textContent = ev.kind === 'study' ? 'Study' : 'Reminder';
         tag.style.fontSize = '11px';
         tag.style.color = 'var(--text-dim)';
         li.appendChild(tag);

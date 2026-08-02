@@ -5,7 +5,7 @@
 // call here just fails silently and the app behaves exactly as it did with
 // localStorage alone — nothing breaks.
 const Sync = (() => {
-  const KEYS = ['homepage_links', 'homepage_reminders', 'homepage_calendar_events', 'homepage_display_name'];
+  const KEYS = ['homepage_links', 'homepage_reminders', 'homepage_calendar_events', 'homepage_display_name', 'homepage_notes', 'homepage_study'];
   let pushTimer = null;
   let available = true;
 

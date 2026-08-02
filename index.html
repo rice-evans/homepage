@@ -8,78 +8,196 @@
 </head>
 <body>
   <div id="grainient-bg"></div>
-  <header class="topbar">
-    <div class="topbar-left">
-      <h1><span id="greeting-prefix">Hello,</span> <span id="display-name" class="editable-name" tabindex="0" title="Click To Edit Your Name">Friend</span></h1>
-      <p id="clock" class="clock"></p>
+
+  <div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-brand">
+          <span class="sidebar-brand-dot"></span>
+          <span class="sidebar-brand-text">Home</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <button class="nav-item" data-view="home" title="Home">
+          <span class="nav-icon">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 9.5L10 3l7 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 8.5V17h10V8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 17v-4.5h4V17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" data-view="calendar" title="Calendar">
+          <span class="nav-icon">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4.5" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 8.5h14" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 3v3M13.5 3v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+          <span class="nav-label">Calendar</span>
+        </button>
+        <button class="nav-item" data-view="notes" title="Notes">
+          <span class="nav-icon">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 3h10v14H5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+          <span class="nav-label">Notes</span>
+        </button>
+        <button class="nav-item" data-view="study" title="Study">
+          <span class="nav-icon">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 5.2C8.6 4 6.6 3.5 4.5 3.7v10.6c2.1-.2 4.1.3 5.5 1.5 1.4-1.2 3.4-1.7 5.5-1.5V3.7C13.4 3.5 11.4 4 10 5.2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 5.2v10.6" stroke="currentColor" stroke-width="1.5"/></svg>
+          </span>
+          <span class="nav-label">Study</span>
+        </button>
+        <button class="nav-item" data-view="chat" title="Chat">
+          <span class="nav-icon">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2V12c0 1.1-.9 2-2 2H8l-4 3v-3H5c-1.1 0-2-.9-2-2V5.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="nav-label">Chat</span>
+        </button>
+        <button class="nav-item" data-view="roblox" title="Roblox Lookup">
+          <span class="nav-icon">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="12" height="12" rx="2" transform="rotate(15 10 10)" stroke="currentColor" stroke-width="1.5"/></svg>
+          </span>
+          <span class="nav-label">Roblox</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <p class="sidebar-hint">Drag border to<br>collapse</p>
+      </div>
+
+      <div class="sidebar-resize-handle" id="sidebar-toggle" title="Collapse sidebar"></div>
+    </aside>
+
+    <!-- Main column -->
+    <div class="main-col">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1><span id="greeting-prefix">Hello,</span> <span id="display-name" class="editable-name" tabindex="0" title="Click To Edit Your Name">Friend</span></h1>
+          <p id="clock" class="clock"></p>
+        </div>
+      </header>
+
+      <main class="content" id="content">
+
+        <!-- Home view -->
+        <section class="view" id="view-home" data-view="home">
+          <section class="panel" id="panel-links">
+            <div class="panel-header">
+              <h2>Quick Links</h2>
+              <button class="btn-icon" id="add-link-btn" title="Add Link">+</button>
+            </div>
+            <div class="links-grid" id="links-grid"></div>
+          </section>
+
+          <section class="panel" id="panel-reminders">
+            <div class="panel-header">
+              <h2>Reminders</h2>
+            </div>
+            <form id="reminder-form" class="inline-form">
+              <input type="text" id="reminder-text" placeholder="New Reminder..." required>
+              <input type="date" id="reminder-due-date" title="Due Date (Optional)">
+              <input type="time" id="reminder-due-time" title="Due Time (Optional)">
+              <button type="submit" class="btn">Add</button>
+            </form>
+            <div class="reminder-list" id="reminder-list"></div>
+          </section>
+        </section>
+
+        <!-- Calendar view -->
+        <section class="view" id="view-calendar" data-view="calendar">
+          <section class="panel panel-wide" id="panel-calendar">
+            <div class="panel-header">
+              <h2>Calendar</h2>
+              <div class="calendar-nav">
+                <button class="btn-icon" id="cal-prev">&lsaquo;</button>
+                <span id="cal-month-label"></span>
+                <button class="btn-icon" id="cal-next">&rsaquo;</button>
+              </div>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+            <div class="calendar-day-panel" id="calendar-day-panel" hidden>
+              <div class="panel-header">
+                <h3 id="calendar-day-title"></h3>
+                <button class="btn-icon" id="calendar-day-close">&times;</button>
+              </div>
+              <ul class="event-list" id="calendar-event-list"></ul>
+              <form id="calendar-event-form" class="inline-form">
+                <input type="text" id="calendar-event-text" placeholder="Add Event..." required>
+                <label class="mini-label">From<input type="date" id="calendar-event-start" required></label>
+                <label class="mini-label">To<input type="date" id="calendar-event-end"></label>
+                <button type="submit" class="btn">Add</button>
+              </form>
+            </div>
+          </section>
+        </section>
+
+        <!-- Notes view -->
+        <section class="view" id="view-notes" data-view="notes">
+          <section class="panel panel-wide" id="panel-notes">
+            <div class="panel-header">
+              <h2>Notes</h2>
+              <button class="btn-icon" id="add-note-btn" title="Add Note">+</button>
+            </div>
+            <div class="notes-grid" id="notes-grid"></div>
+          </section>
+        </section>
+
+        <!-- Study view -->
+        <section class="view" id="view-study" data-view="study">
+          <section class="panel panel-wide" id="panel-study">
+            <div class="panel-header">
+              <h2>Study Tracker</h2>
+              <button class="btn-icon" id="add-study-btn" title="Add Study Item">+</button>
+            </div>
+            <div class="study-board">
+              <div class="study-col" data-status="not-started">
+                <h3 class="study-col-title">Not Started <span class="study-col-count" id="study-count-not-started">0</span></h3>
+                <div class="study-col-list" id="study-list-not-started" data-status="not-started"></div>
+              </div>
+              <div class="study-col" data-status="in-progress">
+                <h3 class="study-col-title">In Progress <span class="study-col-count" id="study-count-in-progress">0</span></h3>
+                <div class="study-col-list" id="study-list-in-progress" data-status="in-progress"></div>
+              </div>
+              <div class="study-col" data-status="complete">
+                <h3 class="study-col-title">Complete <span class="study-col-count" id="study-count-complete">0</span></h3>
+                <div class="study-col-list" id="study-list-complete" data-status="complete"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Chat view -->
+        <section class="view" id="view-chat" data-view="chat">
+          <section class="panel panel-wide panel-chat" id="panel-chat">
+            <div class="panel-header">
+              <h2>AI Chat</h2>
+              <button class="btn-icon" id="chat-clear-btn" title="Clear Chat">&times;</button>
+            </div>
+            <div class="chat-status" id="chat-status" hidden></div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <form id="chat-form" class="chat-form">
+              <textarea id="chat-input" placeholder="Ask Anything... (Enter To Send, Shift+Enter For A New Line)" rows="1" required></textarea>
+              <button type="submit" class="btn" id="chat-send-btn">Send</button>
+            </form>
+          </section>
+        </section>
+
+        <!-- Roblox view -->
+        <section class="view" id="view-roblox" data-view="roblox">
+          <section class="panel panel-wide" id="panel-roblox">
+            <div class="panel-header">
+              <h2>Roblox Account Lookup</h2>
+            </div>
+            <form id="roblox-form" class="inline-form">
+              <input type="text" id="roblox-username" placeholder="Roblox Username..." required>
+              <button type="submit" class="btn">Search</button>
+            </form>
+            <div id="roblox-status" class="roblox-status"></div>
+            <div id="roblox-result" class="roblox-result"></div>
+          </section>
+        </section>
+
+      </main>
     </div>
-  </header>
-
-  <main class="grid">
-
-    <!-- Quick Links -->
-    <section class="panel" id="panel-links">
-      <div class="panel-header">
-        <h2>Quick Links</h2>
-        <button class="btn-icon" id="add-link-btn" title="Add Link">+</button>
-      </div>
-      <div class="links-grid" id="links-grid"></div>
-    </section>
-
-    <!-- Reminders -->
-    <section class="panel" id="panel-reminders">
-      <div class="panel-header">
-        <h2>Reminders</h2>
-      </div>
-      <form id="reminder-form" class="inline-form">
-        <input type="text" id="reminder-text" placeholder="New Reminder..." required>
-        <input type="date" id="reminder-due-date" title="Due Date (Optional)">
-        <input type="time" id="reminder-due-time" title="Due Time (Optional)">
-        <button type="submit" class="btn">Add</button>
-      </form>
-      <div class="reminder-list" id="reminder-list"></div>
-    </section>
-
-    <!-- Calendar -->
-    <section class="panel panel-wide" id="panel-calendar">
-      <div class="panel-header">
-        <h2>Calendar</h2>
-        <div class="calendar-nav">
-          <button class="btn-icon" id="cal-prev">&lsaquo;</button>
-          <span id="cal-month-label"></span>
-          <button class="btn-icon" id="cal-next">&rsaquo;</button>
-        </div>
-      </div>
-      <div class="calendar-grid" id="calendar-grid"></div>
-      <div class="calendar-day-panel" id="calendar-day-panel" hidden>
-        <div class="panel-header">
-          <h3 id="calendar-day-title"></h3>
-          <button class="btn-icon" id="calendar-day-close">&times;</button>
-        </div>
-        <ul class="event-list" id="calendar-event-list"></ul>
-        <form id="calendar-event-form" class="inline-form">
-          <input type="text" id="calendar-event-text" placeholder="Add Event..." required>
-          <label class="mini-label">From<input type="date" id="calendar-event-start" required></label>
-          <label class="mini-label">To<input type="date" id="calendar-event-end"></label>
-          <button type="submit" class="btn">Add</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- Roblox Lookup -->
-    <section class="panel panel-wide" id="panel-roblox">
-      <div class="panel-header">
-        <h2>Roblox Account Lookup</h2>
-      </div>
-      <form id="roblox-form" class="inline-form">
-        <input type="text" id="roblox-username" placeholder="Roblox Username..." required>
-        <button type="submit" class="btn">Search</button>
-      </form>
-      <div id="roblox-status" class="roblox-status"></div>
-      <div id="roblox-result" class="roblox-result"></div>
-    </section>
-
-  </main>
+  </div>
 
   <!-- Add/Edit link modal -->
   <div class="modal" id="link-modal" hidden>
@@ -97,12 +215,77 @@
     </div>
   </div>
 
+  <!-- Add/Edit note modal -->
+  <div class="modal" id="note-modal" hidden>
+    <div class="modal-content">
+      <h3 id="note-modal-title">Add Note</h3>
+      <form id="note-form">
+        <label>Title<input type="text" id="note-title" placeholder="Optional"></label>
+        <label>Note<textarea id="note-body" rows="6" required></textarea></label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="note-cancel">Cancel</button>
+          <button type="button" class="btn btn-danger" id="note-delete" hidden>Delete</button>
+          <button type="submit" class="btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Note PIN modal (lock/unlock) -->
+  <div class="modal" id="pin-modal" hidden>
+    <div class="modal-content">
+      <h3 id="pin-modal-title">Lock Note</h3>
+      <p class="modal-note" id="pin-modal-desc"></p>
+      <form id="pin-form">
+        <label id="pin-label-1">PIN<input type="password" id="pin-input-1" inputmode="numeric" minlength="4" maxlength="8" required></label>
+        <label id="pin-label-2" hidden>Confirm PIN<input type="password" id="pin-input-2" inputmode="numeric" minlength="4" maxlength="8"></label>
+        <p class="modal-error" id="pin-error" hidden></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="pin-cancel">Cancel</button>
+          <button type="submit" class="btn" id="pin-submit">Confirm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit study item modal -->
+  <div class="modal" id="study-modal" hidden>
+    <div class="modal-content">
+      <h3 id="study-modal-title">Add Study Item</h3>
+      <form id="study-form">
+        <label>Title<input type="text" id="study-title" required></label>
+        <label>Status
+          <select id="study-status">
+            <option value="not-started">Not Started</option>
+            <option value="in-progress">In Progress</option>
+            <option value="complete">Complete</option>
+          </select>
+        </label>
+        <div class="modal-row">
+          <label>Date<input type="date" id="study-date"></label>
+          <label>Time<input type="time" id="study-time"></label>
+        </div>
+        <label>Duration (Minutes)<input type="number" id="study-duration" min="0" step="5" placeholder="e.g. 45"></label>
+        <label>Notes<textarea id="study-notes" rows="3" placeholder="Optional"></textarea></label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="study-cancel">Cancel</button>
+          <button type="button" class="btn btn-danger" id="study-delete" hidden>Delete</button>
+          <button type="submit" class="btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="js/grainient.js"></script>
   <script src="js/glass-surface.js"></script>
   <script src="js/sync.js"></script>
+  <script src="js/sidebar.js"></script>
   <script src="js/reminders.js"></script>
+  <script src="js/study.js"></script>
   <script src="js/calendar.js"></script>
   <script src="js/links.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/chat.js"></script>
   <script src="js/roblox.js"></script>
   <script src="js/app.js"></script>
 </body>
