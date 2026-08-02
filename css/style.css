@@ -96,7 +96,6 @@ button, input, select, textarea {
 }
 .nav-item:hover { background: var(--panel-alt); color: var(--text); }
 .nav-item.active { background: var(--accent-dim); color: var(--text); }
-.nav-item-danger:hover { background: rgba(255, 92, 92, 0.14); color: var(--danger); }
 .nav-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: inherit; }
 .nav-icon svg { width: 20px; height: 20px; }
 .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }

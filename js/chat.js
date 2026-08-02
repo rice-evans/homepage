@@ -1,6 +1,6 @@
 // AI Chat widget — a small floating button (bottom-right) that opens a chat
 // popup, available from every page rather than being its own sidebar view.
-// Talks to /api/chat, which proxies Groq server-side (see api/chat.cjs) so
+// Talks to /api/chat, which proxies Groq server-side (see api/chat.js) so
 // the API key never touches the browser. History is kept in localStorage
 // only (not mirrored via Sync) so it doesn't bloat the shared cross-device
 // state; it's a local scratchpad, not dashboard data.
@@ -51,7 +51,7 @@ const Chat = (() => {
   }
 
   // Groq's daily request-usage, read off response headers server-side (see
-  // api/chat.cjs) and rendered as a subtle bar along the bottom of the
+  // api/chat.js) and rendered as a subtle bar along the bottom of the
   // panel. Only appears once we've actually heard back from Groq at least
   // once — there's nothing to show before that.
   function renderUsage(usage) {

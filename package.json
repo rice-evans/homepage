@@ -2,15 +2,11 @@
   "name": "homepage",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "description": "Personal homepage: sidebar dashboard with reminders, calendar, notes, a study tracker, AI chat, and a Roblox account lookup.",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
     "dev": "vercel dev"
-  },
-  "dependencies": {
-    "@vercel/functions": "^3.6.2"
   }
 }
